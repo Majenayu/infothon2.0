@@ -1074,7 +1074,6 @@ const App = (() => {
       grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);">Failed to load history data.</div>';
     }
   }
-  }
 
   // ════════════════════════════════════════════════════════
   //  LEADERBOARD
