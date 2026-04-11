@@ -1470,18 +1470,22 @@ const App = (() => {
     const fab    = document.getElementById('show-route-fab');
     if (!sheet) return;
 
-    const toggleFn = () => {
-      const isCurrentlyHidden = sheet.style.transform.includes('100%');
-      toggleBottomSheet(!isCurrentlyHidden);
+    const toggleFn = (e) => {
+      // If clicking inside the stops list or active buttons, don't collapse
+      if (e && e.target.closest('#route-stops')) return;
+      
+      const isMinimized = sheet.classList.contains('minimized');
+      toggleBottomSheet(isMinimized); // If minimized, then show. Else hide.
     };
 
-    if (handle) handle.addEventListener('touchstart', (e) => {
-      startY = e.touches[0].clientY;
-      sheet.classList.add('is-dragging');
-      isDragging = true;
-    }, { passive: true });
+    if (handle) {
+      handle.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        sheet.classList.add('is-dragging');
+        isDragging = true;
+      }, { passive: true });
+    }
 
-    if (handle) handle.addEventListener('click', toggleFn);
     if (header) {
       header.style.cursor = 'pointer';
       header.addEventListener('click', toggleFn);
@@ -1491,8 +1495,6 @@ const App = (() => {
       if (!isDragging) return;
       const currentY = e.touches[0].clientY;
       const deltaY = currentY - startY;
-
-      // Prevent dragging too high
       if (deltaY < -20) return; 
 
       sheet.style.transform = `translateY(${Math.max(0, deltaY)}px)`;
@@ -1503,20 +1505,16 @@ const App = (() => {
       isDragging = false;
       sheet.classList.remove('is-dragging');
 
-      const endY = sheet.style.transform.replace(/[^0-9.]/g, '') || 0;
-      const threshold = 100;
+      // Clear inline transform to allow class-based animation to take over
+      const transformValue = sheet.style.transform;
+      sheet.style.transform = '';
 
-      if (parseFloat(endY) > threshold) {
+      const endY = transformValue.replace(/[^0-9.]/g, '') || 0;
+      if (parseFloat(endY) > 100) {
         toggleBottomSheet(false); // Hide
       } else {
         toggleBottomSheet(true);  // Restore
       }
-    });
-
-    // Fallback click for desktop
-    handle.addEventListener('click', () => {
-      const isCurrentlyHidden = sheet.style.transform.includes('100%');
-      toggleBottomSheet(!isCurrentlyHidden);
     });
   }
 
@@ -1526,10 +1524,12 @@ const App = (() => {
     if (!sheet) return;
 
     if (show) {
-      sheet.style.transform = 'translateY(0)';
+      sheet.classList.remove('minimized');
+      sheet.classList.add('expanded');
       if (fab) fab.style.display = 'none';
     } else {
-      sheet.style.transform = 'translateY(100%)';
+      sheet.classList.remove('expanded');
+      sheet.classList.add('minimized');
       if (fab) fab.style.display = 'flex';
     }
   }

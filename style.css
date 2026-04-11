@@ -672,6 +672,8 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
   box-shadow: 0 -8px 24px rgba(0,0,0,0.5);
   padding-bottom: 80px;
 }
+.bottom-sheet.minimized { transform: translateY(100dvh); }
+.bottom-sheet.expanded { transform: translateY(0); }
 .bottom-sheet.is-dragging { transition: none; }
 .sheet-handle {
   width: 44px; height: 5px; border-radius: 5px;
