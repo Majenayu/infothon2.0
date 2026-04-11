@@ -399,10 +399,10 @@ const MapModule = (() => {
         // Feature 3: check 20m proximity for the current H-User
         checkProximityNotification(loc.location);
 
-        // Feature 6: Draw Live Connection Line (Truck to House)
+        // Feature 6: Draw Live Street Route (Truck to House)
         const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
         if (userLoc) {
-          updateLiveConnectionLine(loc.location, userLoc);
+          updateLiveStreetRoute(loc.location, userLoc);
         }
 
       } else {
@@ -417,35 +417,43 @@ const MapModule = (() => {
     } catch(e) {}
   }
 
-  function updateLiveConnectionLine(driverLoc, userLoc) {
+  // Feature 6: Real street-following route (Truck to House)
+  let lastStreetRouteFetch = 0;
+  async function updateLiveStreetRoute(driverLoc, userLoc) {
     if (!map) return;
-    const geojson = {
-      'type': 'Feature',
-      'geometry': {
-        'type': 'LineString',
-        'coordinates': [
-          [driverLoc.lng, driverLoc.lat],
-          [userLoc.lng, userLoc.lat]
-        ]
-      }
-    };
+    
+    const now = Date.now();
+    if (now - lastStreetRouteFetch < 10000) return; // Throttle to 10s
+    lastStreetRouteFetch = now;
 
-    if (map.getSource('connection-line')) {
-      map.getSource('connection-line').setData(geojson);
-    } else {
-      map.addSource('connection-line', { 'type': 'geojson', 'data': geojson });
-      map.addLayer({
-        'id': 'connection-line',
-        'type': 'line',
-        'source': 'connection-line',
-        'layout': { 'line-join': 'round', 'line-cap': 'round' },
-        'paint': {
-          'line-color': '#FF6B00',
-          'line-width': 3,
-          'line-dasharray': [2, 2]
-        }
-      });
-    }
+    try {
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${driverLoc.lng},${driverLoc.lat};${userLoc.lng},${userLoc.lat}?geometries=geojson&access_token=${ECOROUTE_CONFIG.MAPBOX_TOKEN}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.routes || !data.routes.length) return;
+
+      const geojson = {
+        'type': 'Feature',
+        'geometry': data.routes[0].geometry
+      };
+
+      if (map.getSource('connection-line')) {
+        map.getSource('connection-line').setData(geojson);
+      } else {
+        map.addSource('connection-line', { 'type': 'geojson', 'data': geojson });
+        map.addLayer({
+          'id': 'connection-line',
+          'type': 'line',
+          'source': 'connection-line',
+          'layout': { 'line-join': 'round', 'line-cap': 'round' },
+          'paint': {
+            'line-color': '#FF6B00',
+            'line-width': 5,
+            'line-opacity': 0.8
+          }
+        }, 'truck-marker-layer'); // Ensure it's under markers
+      }
+    } catch (e) { console.warn('Live street route fetch failed', e); }
   }
 
   function removeLiveConnectionLine() {

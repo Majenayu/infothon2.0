@@ -1504,7 +1504,7 @@ const App = (() => {
       sheet.style.transform = 'translateY(0)';
       if (fab) fab.style.display = 'none';
     } else {
-      sheet.style.transform = 'translateY(calc(100% - 10px))';
+      sheet.style.transform = 'translateY(100%)';
       if (fab) fab.style.display = 'flex';
     }
   }
