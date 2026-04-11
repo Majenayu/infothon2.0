@@ -1449,18 +1449,43 @@ const App = (() => {
   let sheetY = 0;
   let startY = 0;
   let isDragging = false;
+  let liveCoords = null;
+
+  function startLiveTracking() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.watchPosition(
+      (pos) => {
+        liveCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        // If we have a map, and it's the home view, we might want to refresh nearest etc.
+      },
+      (err) => console.warn('Geolocation failed', err),
+      { enableHighAccuracy: true, maximumAge: 10000 }
+    );
+  }
 
   function setupBottomSheet() {
     const handle = document.querySelector('.sheet-handle');
+    const header = document.querySelector('.sheet-driver-row');
     const sheet  = document.querySelector('.bottom-sheet');
     const fab    = document.getElementById('show-route-fab');
-    if (!handle || !sheet) return;
+    if (!sheet) return;
 
-    handle.addEventListener('touchstart', (e) => {
+    const toggleFn = () => {
+      const isCurrentlyHidden = sheet.style.transform.includes('100%');
+      toggleBottomSheet(!isCurrentlyHidden);
+    };
+
+    if (handle) handle.addEventListener('touchstart', (e) => {
       startY = e.touches[0].clientY;
       sheet.classList.add('is-dragging');
       isDragging = true;
     }, { passive: true });
+
+    if (handle) handle.addEventListener('click', toggleFn);
+    if (header) {
+      header.style.cursor = 'pointer';
+      header.addEventListener('click', toggleFn);
+    }
 
     window.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
@@ -1543,6 +1568,7 @@ const App = (() => {
     setupPWA();
     setupImageUpload();
     setupBottomSheet();
+    startLiveTracking();
 
     // Bottom nav
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -1653,7 +1679,7 @@ const App = (() => {
     // Admin
     resetAllUserPreferences,
     // Expose for MapModule to call (Feature 3)
-    getUserLocation: () => user.location,
+    getUserLocation: () => liveCoords || user?.location,
     getCurrentUser:  () => user,
     getCurrentRole:  () => currentRole
   };
