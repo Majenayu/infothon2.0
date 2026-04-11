@@ -35,6 +35,13 @@ const ApiModule = (() => {
       headers: authHeaders(),
       body: body ? JSON.stringify(body) : undefined
     });
+    
+    const contentType = res.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+       console.error(`API Error: Received HTML for ${path}. Check server route order.`);
+       throw new Error(`Data format error (HTML received instead of JSON)`);
+    }
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
     return data;

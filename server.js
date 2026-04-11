@@ -25,11 +25,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Serve static files with proper rooting
-const publicPath = path.resolve(__dirname);
-app.use(express.static(publicPath));
-console.log(`📡 Serving static files from: ${publicPath}`);
-
 // ── MongoDB Connection ────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://majen:majen@majen.f3jgom3.mongodb.net/?appName=majen';
 
@@ -804,12 +799,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve static files FIRST
-app.use(express.static(__dirname));
 
-// API routes above this...
+// ── Static & SPA Fallback (MUST BE LAST) ──────────────────────
+const publicPath = path.resolve(__dirname);
+app.use(express.static(publicPath));
+console.log(`📡 Serving static files from: ${publicPath}`);
 
-// SPA fallback (IMPORTANT)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
