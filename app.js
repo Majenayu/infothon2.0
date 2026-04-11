@@ -44,6 +44,11 @@ const App = (() => {
     el.className = `toast ${type} show`;
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+
+    // TTS integration
+    if (typeof I18n !== 'undefined' && typeof I18n.speak === 'function') {
+      I18n.speak(msg);
+    }
   }
 
   // ════════════════════════════════════════════════════════
@@ -332,6 +337,19 @@ const App = (() => {
     if (tab === 'profile')     renderProfile();
 
     updateRoleGlobalUI();
+
+    // TTS Integration
+    if (typeof I18n !== 'undefined' && typeof I18n.speak === 'function') {
+      const navKeys = {
+        home: 'nav_home_speak',
+        map: 'nav_map_speak',
+        history: 'nav_history_speak',
+        leaderboard: 'nav_rewards_speak',
+        chat: 'nav_chat_speak',
+        profile: 'nav_profile_speak'
+      };
+      if (navKeys[tab]) I18n.speak(I18n.t(navKeys[tab]));
+    }
   }
 
   // ── Global role-based UI toggles (Map buttons, nav tabs, etc) ──
@@ -1386,6 +1404,10 @@ const App = (() => {
     renderProfile();
     renderHome(); // update address in home hero card
     showToast(I18n.t('location_saved'), 'success');
+    
+    if (typeof I18n !== 'undefined' && typeof I18n.speak === 'function') {
+      I18n.speak(I18n.t('location_sharing_active'));
+    }
   }
 
   // ════════════════════════════════════════════════════════
@@ -1621,6 +1643,23 @@ const App = (() => {
         renderHistory(tab.dataset.filter);
       });
     });
+
+    // Voice Toggle
+    const voiceToggle = document.getElementById('voice-toggle');
+    if (voiceToggle && typeof I18n !== 'undefined') {
+      voiceToggle.checked = I18n.isVoiceEnabled();
+      voiceToggle.addEventListener('change', e => {
+        I18n.setVoiceEnabled(e.target.checked);
+        if (e.target.checked) I18n.speak(I18n.t('voice_feedback'));
+      });
+    }
+
+    // Interaction bootstrap for TTS (bypass autoplay blocks)
+    document.body.addEventListener('click', () => {
+      if (typeof I18n !== 'undefined' && typeof I18n.captureClickForTTS === 'function') {
+        I18n.captureClickForTTS();
+      }
+    }, { once: true });
 
     // Check for existing JWT session (page refresh)
     if (ApiModule.hasSession()) {

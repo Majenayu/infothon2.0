@@ -378,6 +378,18 @@ const I18n = (() => {
       efficiency_label: 'Efficiency',
       done_today_btn: 'Done for today',
 
+      // Voice Feedback
+      voice_feedback: 'Voice Feedback (Beta)',
+      voice_settings: 'Accessibility & Voice',
+      nav_home_speak: 'Switching to Home',
+      nav_map_speak: 'Opening Map',
+      nav_history_speak: 'Viewing History',
+      nav_rewards_speak: 'Opening Rewards',
+      nav_chat_speak: 'Opening EcoBot Chat',
+      nav_profile_speak: 'Opening Profile',
+      location_sharing_active: 'Location sharing is now active',
+      location_sharing_inactive: 'Location sharing paused',
+
       // Map & Popups
       map_not_configured: 'Map Not Configured',
       house_label: 'House',
@@ -740,6 +752,18 @@ const I18n = (() => {
       efficiency_label: 'दक्षता',
       done_today_btn: 'आज के लिए हो गया',
 
+      // Voice Feedback
+      voice_feedback: 'आवाज फीडबैक (बीटा)',
+      voice_settings: 'पहुंच और आवाज',
+      nav_home_speak: 'होम पर जा रहे हैं',
+      nav_map_speak: 'नक्शा खोल रहे हैं',
+      nav_history_speak: 'इतिहास देख रहे हैं',
+      nav_rewards_speak: 'पुरस्कार खोल रहे हैं',
+      nav_chat_speak: 'इकोबॉट चैट खोल रहे हैं',
+      nav_profile_speak: 'प्रोफाइल खोल रहे हैं',
+      location_sharing_active: 'लोकेशन शेयरिंग अब सक्रिय है',
+      location_sharing_inactive: 'लोकेशन शेयरिंग रुकी हुई है',
+
       // Map & Popups
       map_not_configured: 'मानचित्र कॉन्फ़िगर नहीं किया गया',
       house_label: 'घर',
@@ -1099,8 +1123,20 @@ const I18n = (() => {
       great_job_msg: 'ಇಂದು ಅದ್ಭುತ ಕೆಲಸ!',
       collection_summary_msg: 'ಇಲ್ಲಿ ನಿಮ್ಮ ಸಂಗ್ರಹಣಾ ಸಾರಾಂಶವಿದೆ',
       pickups_label: 'ಪಿಕಪ್‌ಗಳು',
-      efficiency_label: 'ದಕ್ಷತೆ',
-      done_today_btn: 'ಇಂದಿಗೆ ಮುಗಿಯಿತು',
+      accuracy_label: 'Accuracy',
+      done_today_btn: 'Done for today',
+
+      // Voice Feedback
+      voice_feedback: 'Voice Feedback 🔊',
+      voice_settings: 'Accessibility & Voice',
+      nav_home_speak: 'ಹೋಮ್‌ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ',
+      nav_map_speak: 'ನಕ್ಷೆಯನ್ನು ತೆರೆಯಲಾಗುತ್ತಿದೆ',
+      nav_history_speak: 'ಇತಿಹಾಸವನ್ನು ವೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ',
+      nav_rewards_speak: 'ಬಹುಮಾನಗಳನ್ನು ತೆರೆಯಲಾಗುತ್ತಿದೆ',
+      nav_chat_speak: 'ಇಕೋಬಾಟ್ ಚಾಟ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ',
+      nav_profile_speak: 'ಪ್ರೊಫೈಲ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ',
+      location_sharing_active: 'ಸ್ಥಳ ಹಂಚಿಕೆ ಈಗ ಸಕ್ರಿಯವಾಗಿದೆ',
+      location_sharing_inactive: 'ಸ್ಥಳ ಹಂಚಿಕೆಯನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ',
 
       // Map & Popups
       map_not_configured: 'ನಕ್ಷೆ ಕಾನ್ಫಿಗರ್ ಆಗಿಲ್ಲ',
@@ -1192,10 +1228,61 @@ const I18n = (() => {
     }
   });
 
-  // ── Init: apply on DOM load ──────────────────────────────
+  // ── Text To Speech (TTS) ─────────────────────────────
+  let speakEnabled = localStorage.getItem('eco_voice_feedback') === 'true';
+
+  function setVoiceEnabled(bool) {
+    speakEnabled = bool;
+    localStorage.setItem('eco_voice_feedback', bool);
+  }
+
+  function captureClickForTTS() {
+    // Some browsers require a user gesture to init speech
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance('');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    }
+  }
+
+  function speak(text) {
+    if (!speakEnabled || !('speechSynthesis' in window)) return;
+
+    console.log(`[TTS] Speaking: "${text}" [${currentLang}]`);
+
+    // Cancel existing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Attempt to pick a localized voice
+    const voices = window.speechSynthesis.getVoices();
+    const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN' };
+    const targetLang = langMap[currentLang] || 'en-US';
+
+    // Find direct match or start-with match
+    let voice = voices.find(v => v.lang === targetLang) || 
+                voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
+    
+    if (voice) utterance.voice = voice;
+    utterance.lang = targetLang;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Pre-fetch voices (Chrome needs this)
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = speechSynthesis.getVoices;
+    }
+  }
+
   function init() {
     applyTranslations();
   }
 
-  return { t, setLanguage, getLanguage, applyTranslations, init, toggleLangDropdown };
+  return { t, setLanguage, getLanguage, applyTranslations, init, toggleLangDropdown, speak, setVoiceEnabled, isVoiceEnabled: () => speakEnabled, captureClickForTTS };
 })();
