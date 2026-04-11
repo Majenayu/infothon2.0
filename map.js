@@ -82,30 +82,15 @@ const MapModule = (() => {
   }
 
   async function addUserPins() {
-    // Remove existing markers
-    userMarkers.forEach(m => m.remove());
-    userMarkers = [];
-
+    clearUserMarkers();
+    
     try {
+      // 1. Fetch Unified Active Users (Real + DB Mocks)
       const res = await fetch('/api/users/active');
-      const realUsers = await res.json();
-
-      // 1. Fetch Admin Mock Users from DB
-      let mockList = [];
-      try {
-        const mockRes = await ApiModule.getAdminMocks();
-        mockList = mockRes || [];
-      } catch(e) { 
-        console.warn('Mocks fetch failed, using static fallback');
-        mockList = MOCK_USERS; 
-      }
-
-      // 2. Merge real users with mock list
-      const mockFiltered = mockList.filter(mu => !realUsers.some(ru => ru.name === mu.name));
-      const usersToShow = [...realUsers, ...mockFiltered];
-
+      const usersToShow = res.ok ? await res.json() : MOCK_USERS; 
+      
       usersToShow.forEach(user => {
-        const fill = user.fillLevel || user.fillPercentage || 0;
+        const fill = user.fillLevel || 0;
         
         // Logical "Active" status:
         // Ready for collection (Green) if:
@@ -462,33 +447,18 @@ const MapModule = (() => {
     App.showToast('Fetching route...', 'info');
 
     try {
+      // 1. Fetch Unified Active Users (Real + DB Mocks)
       const res = await fetch('/api/users/active');
-      const realUsers = await res.json();
+      const usersToShow = res.ok ? await res.json() : [];
       
-      // 1. Fetch Admin Mock Users from DB
-      let mockList = [];
-      try {
-        const mockRes = await ApiModule.getAdminMocks();
-        mockList = mockRes || [];
-      } catch(e) { 
-        mockList = MOCK_USERS; 
-      }
-
-      // Merge real active users with active mock users
-      const realActive = realUsers.filter(u => {
+      const usersToVisit = usersToShow.filter(u => {
         const fill = u.fillLevel || 0;
+        // Logic: Visit if Confirmed or (Not Checked + > Threshold)
         return u.isActiveToday === true || (u.isActiveToday === null && fill >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD);
       });
 
-      const mockActive = mockList.filter(mu => {
-        const isAlreadyReal = realUsers.some(ru => ru.name === mu.name);
-        return !isAlreadyReal && mu.fillLevel >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD;
-      });
-
-      const usersToVisit = [...realActive, ...mockActive];
-
       if (usersToVisit.length === 0) {
-        App.showToast('No active users needing pickup today', 'info');
+        App.showToast('No active locations needing pickup today', 'info');
         return;
       }
 

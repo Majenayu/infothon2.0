@@ -390,8 +390,9 @@ app.patch('/api/bins/:id/fill', requireAuth, requireDb, async (req, res) => {
 // GET /api/users/active
 app.get('/api/users/active', requireDb, async (req, res) => {
   try {
-    const users = await User.find({ role: { $in: ['home', 'point'] } });
-    const mapped = users.map(user => ({
+    // 1. Fetch real users
+    const realUsers = await User.find({ role: { $in: ['home', 'point'] } });
+    const mappedReal = realUsers.map(user => ({
       id: user._id,
       name: user.name,
       role: user.role,
@@ -399,9 +400,31 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       lat: user.location?.lat,
       lng: user.location?.lng,
       fillLevel: user.fillLevel,
-      isActiveToday: user.isActiveToday
+      isActiveToday: user.isActiveToday,
+      isMock: false
     }));
-    res.json(mapped);
+
+    // 2. Fetch mock users (Demo data)
+    const mocks = await MockUser.find();
+    const mappedMocks = mocks.map(m => ({
+      id: m.id,
+      name: m.name,
+      role: m.role,
+      address: m.address,
+      lat: m.lat,
+      lng: m.lng,
+      fillLevel: m.fillLevel,
+      isActiveToday: null, // Mocks don't have daily opt-in logic typically
+      isMock: true
+    }));
+
+    // Merge and deduplicate by name (if a mock has same name as real, keep real)
+    const combined = [...mappedReal];
+    mappedMocks.forEach(m => {
+      if (!combined.some(u => u.name === m.name)) combined.push(m);
+    });
+
+    res.json(combined);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
