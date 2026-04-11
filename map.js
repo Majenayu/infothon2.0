@@ -104,12 +104,21 @@ const MapModule = (() => {
       const currentUser = (window.App && typeof App.getCurrentUser === 'function') ? App.getCurrentUser() : null;
 
       usersToShow.forEach(user => {
-        // DRIVER: Sees everything in their territory
+        // DRIVER: Sees EVERYTHING in demo
         // OTHERS: Only see community points and their own location
         if (currentRole !== 'driver') {
            if (user.role !== 'point' && (!currentUser || user.id !== currentUser.id)) {
              return;
            }
+        }
+
+        // Coordinate Audit: Support both top-level and nested location object
+        const finalLat = user.lat || (user.location && user.location.lat);
+        const finalLng = user.lng || (user.location && user.location.lng);
+
+        if (!finalLat || !finalLng) {
+            console.warn('Skipping marker, invalid coordinates:', user.name, user.id);
+            return;
         }
 
         const fill = user.fillLevel || 0;
@@ -154,17 +163,13 @@ const MapModule = (() => {
             </div>
           `);
 
-        const lng = user.lng || user.location?.lng;
-        const lat = user.lat || user.location?.lat;
-        
-        if (lng && lat) {
-          const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-            .setLngLat([lng, lat])
-            .setPopup(popup)
-            .addTo(map);
-          userMarkers.push(marker);
-        }
-      });
+         const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+           .setLngLat([finalLng, finalLat])
+           .setPopup(popup)
+           .addTo(map);
+
+         userMarkers.push(marker);
+       });
 
     } catch (err) {
       console.warn("Failed to fetch real users, using mock data", err);

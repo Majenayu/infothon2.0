@@ -454,9 +454,9 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       } catch (e) { /* unauthenticated or fake demo token */ }
     }
 
-    // 2. Fetch real users filtered by area
+    // 2. Fetch real users (Relaxed filter for drivers in demo)
     let query = { role: { $in: ['home', 'point'] } };
-    if (assignedAreas) query.area = { $in: assignedAreas };
+    // if (assignedAreas) query.area = { $in: assignedAreas }; // Bypass for demo
     const realUsers = await User.find(query);
     const mappedReal = realUsers.map(user => ({
       id: user._id,
@@ -464,16 +464,16 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       role: user.role,
       area: user.area,
       address: user.address,
-      lat: user.location?.lat,
-      lng: user.location?.lng,
+      lat: user.location?.lat || user.lat,
+      lng: user.location?.lng || user.lng,
       fillLevel: user.fillLevel,
       isActiveToday: user.isActiveToday,
       isMock: false
     }));
 
-    // 3. Fetch mock users filtered by area
+    // 3. Fetch mock users (Relaxed filter for drivers in demo)
     let mockQuery = {};
-    if (assignedAreas) mockQuery.area = { $in: assignedAreas };
+    // if (assignedAreas) mockQuery.area = { $in: assignedAreas }; // Bypass for demo
     const mocks = await MockUser.find(mockQuery);
     const mappedMocks = mocks.map(m => ({
       id: m.id,
