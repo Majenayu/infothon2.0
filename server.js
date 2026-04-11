@@ -151,15 +151,17 @@ async function seedMocks() {
   console.log('🌱 Seeding Gokulam geometric mock users...');
   const initialMocks = [
     { id: 'U001', name: 'Rahul Sharma', role: 'home', address: 'Vijayanagar 1st Stage, Mysuru', area: 'gokulam_north', lng: 76.6082, lat: 12.3258, fillLevel: 85, lastReported: '2 hrs ago', points: 1250 },
-    { id: 'U002', name: 'Priya Nair', role: 'home', address: 'Kuvempunagar, Mysuru', area: 'gokulam_south', lng: 76.6231, lat: 12.3441, fillLevel: 45, lastReported: '5 hrs ago', points: 870 },
-    { id: 'U003', name: 'Bin — Saraswathipuram', role: 'point', address: 'Saraswathipuram Main Road', area: 'gokulam_east', lng: 76.6358, lat: 12.3312, fillLevel: 92, lastReported: '1 hr ago', points: 2100 },
-    { id: 'U004', name: 'Deepak Hegde', role: 'home', address: 'Jayalakshmipuram, Mysuru', area: 'gokulam_west', lng: 76.6501, lat: 12.3189, fillLevel: 78, lastReported: '3 hrs ago', points: 540 },
+    { id: 'U002', name: 'Priya Nair', role: 'home', address: 'Kuvempunagar, Mysuru', area: 'gokulam_north', lng: 76.6231, lat: 12.3441, fillLevel: 45, lastReported: '5 hrs ago', points: 870 },
+    { id: 'U003', name: 'Bin — Saraswathipuram', role: 'point', address: 'Saraswathipuram Main Road', area: 'gokulam_north', lng: 76.6358, lat: 12.3312, fillLevel: 92, lastReported: '1 hr ago', points: 2100 },
+    { id: 'U004', name: 'Deepak Hegde', role: 'home', address: 'Jayalakshmipuram, Mysuru', area: 'gokulam_north', lng: 76.6501, lat: 12.3189, fillLevel: 78, lastReported: '3 hrs ago', points: 540 },
+    { id: 'U011', name: 'Mock House 1', role: 'home', address: 'Mysuru North', area: 'gokulam_north', lng: 76.6110, lat: 12.3550, fillLevel: 82, lastReported: '1 hr ago', points: 100 },
+    { id: 'U012', name: 'Mock House 2', role: 'home', address: 'Mysuru Central', area: 'gokulam_north', lng: 76.6180, lat: 12.3520, fillLevel: 25, lastReported: '3 hrs ago', points: 50 },
     { id: 'U005', name: 'Bin — Gokulam', role: 'point', address: 'Gokulam 3rd Stage', area: 'gokulam_north', lng: 76.6143, lat: 12.3502, fillLevel: 33, lastReported: '8 hrs ago', points: 1680 },
-    { id: 'U006', name: 'Anitha Reddy', role: 'home', address: 'Rajivnagar, Mysuru', area: 'jayalakshmipuram', lng: 76.6620, lat: 12.3390, fillLevel: 73, lastReported: '2 hrs ago', points: 990 },
-    { id: 'U007', name: 'Bin — Nazarbad', role: 'point', address: 'Nazarbad Mohalla', area: 'gokulam_south', lng: 76.6432, lat: 12.3088, fillLevel: 88, lastReported: '30 mins ago', points: 3200 },
-    { id: 'U008', name: 'Suresh Kumar', role: 'home', address: 'Hebbal 2nd Stage, Mysuru', area: 'gokulam_east', lng: 76.6195, lat: 12.2980, fillLevel: 55, lastReported: '6 hrs ago', points: 430 },
-    { id: 'U009', name: 'Meera Iyengar', role: 'home', address: 'Lashkar Mohalla, Mysuru', area: 'jayalakshmipuram', lng: 76.6553, lat: 12.3055, fillLevel: 95, lastReported: '45 mins ago', points: 1870 },
-    { id: 'U010', name: 'Bin — Devaraja', role: 'point', address: 'Devaraja Urs Road', area: 'gokulam_west', lng: 76.6388, lat: 12.2940, fillLevel: 62, lastReported: '4 hrs ago', points: 760 }
+    { id: 'U006', name: 'Anitha Reddy', role: 'home', address: 'Rajivnagar, Mysuru', area: 'gokulam_north', lng: 76.6620, lat: 12.3390, fillLevel: 73, lastReported: '2 hrs ago', points: 990 },
+    { id: 'U007', name: 'Bin — Nazarbad', role: 'point', address: 'Nazarbad Mohalla', area: 'gokulam_north', lng: 76.6432, lat: 12.3088, fillLevel: 88, lastReported: '30 mins ago', points: 3200 },
+    { id: 'U008', name: 'Suresh Kumar', role: 'home', address: 'Hebbal 2nd Stage, Mysuru', area: 'gokulam_north', lng: 76.6195, lat: 12.2980, fillLevel: 55, lastReported: '6 hrs ago', points: 430 },
+    { id: 'U009', name: 'Meera Iyengar', role: 'home', address: 'Lashkar Mohalla, Mysuru', area: 'gokulam_north', lng: 76.6553, lat: 12.3055, fillLevel: 95, lastReported: '45 mins ago', points: 1870 },
+    { id: 'U010', name: 'Bin — Devaraja', role: 'point', address: 'Devaraja Urs Road', area: 'gokulam_north', lng: 76.6388, lat: 12.2940, fillLevel: 62, lastReported: '4 hrs ago', points: 760 }
   ];
   await MockUser.insertMany(initialMocks);
   

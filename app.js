@@ -1582,8 +1582,11 @@ const App = (() => {
     openIssueReportModal, submitDriverReport,
     // Feature 5: Trip completion summary
     handleTripComplete,
+    // Admin
+    resetAllUserPreferences,
     // Expose for MapModule to call (Feature 3)
     getUserLocation: () => user.location,
+    getCurrentUser:  () => user,
     getCurrentRole:  () => currentRole
   };
 })();

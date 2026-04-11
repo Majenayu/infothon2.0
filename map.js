@@ -100,13 +100,16 @@ const MapModule = (() => {
       const res = await fetch('/api/users/active', { headers });
       const usersToShow = res.ok ? await res.json() : MOCK_USERS; 
       
-      const currentRole = window.App ? App.getCurrentRole() : 'home';
-      const currentUser = window.App ? App.getCurrentUser() : null;
+      const currentRole = (window.App && typeof App.getCurrentRole === 'function') ? App.getCurrentRole() : 'home';
+      const currentUser = (window.App && typeof App.getCurrentUser === 'function') ? App.getCurrentUser() : null;
 
       usersToShow.forEach(user => {
-        // If not a driver, only show Community Points and the user themselves
-        if (currentRole !== 'driver' && user.role !== 'point' && (!currentUser || user.id !== currentUser.id)) {
-            return;
+        // DRIVER: Sees everything in their territory
+        // OTHERS: Only see community points and their own location
+        if (currentRole !== 'driver') {
+           if (user.role !== 'point' && (!currentUser || user.id !== currentUser.id)) {
+             return;
+           }
         }
 
         const fill = user.fillLevel || 0;
