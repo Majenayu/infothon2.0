@@ -460,6 +460,9 @@
       <div class="driver-controls" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px;">
         <button id="driver-online-btn" class="btn btn-primary" style="background:#22C55E;border-color:#22C55E;" onclick="App.toggleDriverOnline()">📍 Go Online (Share Location)</button>
         <button id="driver-block-btn" class="btn btn-secondary" style="border-color:#EF4444;color:#EF4444;" onclick="App.toggleDriverBlock()">🔒 Block User Pickup Requests</button>
+        <button id="overload-btn" class="btn" style="display:none; background:rgba(239,68,68,0.1); border:1px solid #EF4444; color:#EF4444; font-weight:700; border-radius:12px; padding:14px; transition:all 0.2s;" onclick="OverloadModule.declare()">
+          🚨 Declare Area Overload
+        </button>
       </div>
 
       <div class="driver-stats-row">
@@ -536,10 +539,6 @@
   </div>
 
 
-
-  <button id="overload-btn" class="btn" style="display:none; position:absolute; bottom:96px; left:20px; right:20px; background:transparent; border:2px solid #EF4444; color:#EF4444; z-index:10; font-weight:700; border-radius:12px; padding:16px; transition:all 0.2s;" onclick="OverloadModule.declare()">
-    🚨 Declare Area Overload
-  </button>
 
   <button id="route-start-btn" class="btn btn-primary route-start-btn" style="display:none;">
     🚛 Start Collection Route
