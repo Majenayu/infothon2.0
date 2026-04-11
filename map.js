@@ -427,6 +427,7 @@ const MapModule = (() => {
         }
         driverWasOnline = false;
         proximityNotifiedThisSession = false; // reset on driver offline
+        mapGeneratedForObserver = false;
         if (truckMarker) { truckMarker.remove(); truckMarker = null; }
         removeLiveConnectionLine();
       }
