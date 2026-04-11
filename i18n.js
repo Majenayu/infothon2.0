@@ -1212,8 +1212,20 @@ const I18n = (() => {
   // ── Apply translations to all data-i18n elements ─────────
   function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      const translated = t(key);
+      const attrValue = el.getAttribute('data-i18n');
+      
+      // Support for [attr]key syntax
+      if (attrValue.startsWith('[')) {
+        const match = attrValue.match(/^\[(.+?)\](.+)$/);
+        if (match) {
+          const attrName = match[1];
+          const key      = match[2];
+          el.setAttribute(attrName, t(key));
+          return; // Don't set textContent for attribute-only keys
+        }
+      }
+
+      const translated = t(attrValue);
       if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
         el.placeholder = translated;
       } else if (el.tagName === 'OPTION') {
