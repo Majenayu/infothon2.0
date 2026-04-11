@@ -552,10 +552,15 @@ const App = (() => {
       return;
     }
     navigate('map');
+    const loc = (typeof liveCoords !== 'undefined' && liveCoords) ? liveCoords : (user && user.location);
+    if (!loc) return;
+    
     // Give map time to init
     setTimeout(() => {
-      MapModule.routeToNearestPoint(user.location.lng, user.location.lat);
-    }, 500);
+      if (typeof MapModule !== 'undefined' && typeof MapModule.routeToNearestPoint === 'function') {
+        MapModule.routeToNearestPoint(loc.lng, loc.lat);
+      }
+    }, 800);
   }
 
   // ── Status Banner ─────────────────────────────────────────

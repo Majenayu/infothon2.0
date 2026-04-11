@@ -294,7 +294,7 @@ const I18n = (() => {
       fetching_route_msg: 'Fetching route...',
       route_ready_msg: 'Route ready! {count} active stops',
       route_fetch_failed: 'Route fetch failed. Check token or network.',
-      walking_route_gen: 'Walking route to {name} generated',
+      walking_route_gen: 'Generated walking route to {name} ({dist}m, {time} min)',
 
       // Verification & Reporting
       bin_verified: 'Verified! {name}\'s bin collected. +10 pts awarded. 🎉',
@@ -677,7 +677,7 @@ const I18n = (() => {
       fetching_route_msg: 'मार्ग प्राप्त किया जा रहा है...',
       route_ready_msg: 'मार्ग तैयार! {count} सक्रिय स्टॉप',
       route_fetch_failed: 'मार्ग प्राप्त करना विफल रहा। टोकन या नेटवर्क जांचें।',
-      walking_route_gen: '{name} के लिए पैदल मार्ग तैयार',
+      walking_route_gen: '{name} के लिए पैदल मार्ग तैयार है ({dist}m, {time} मिनट)',
 
       // Verification & Reporting
       bin_verified: 'सत्यापित! {name} का बिन एकत्र किया गया। +10 अंक दिए गए। 🎉',
@@ -1060,7 +1060,7 @@ const I18n = (() => {
       fetching_route_msg: 'ಮಾರ್ಗವನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...',
       route_ready_msg: 'ಮಾರ್ಗ ಸಿದ್ಧವಾಗಿದೆ! {count} ಸಕ್ರಿಯ ನಿಲ್ದಾಣಗಳು',
       route_fetch_failed: 'ಮಾರ್ಗ ಪಡೆಯಲು ವಿಫಲವಾಗಿದೆ. ಟೋಕನ್ ಅಥವಾ ನೆಟ್‌ವರ್ಕ್ ಪರಿಶೀಲಿಸಿ.',
-      walking_route_gen: '{name} ಗೆ ನಡಿಗೆ ಮಾರ್ಗ ರಚಿಸಲಾಗಿದೆ',
+      walking_route_gen: '{name} ಗೆ ನಡಿಗೆ ಮಾರ್ಗ ಸಿದ್ಧವಾಗಿದೆ ({dist}m, {time} ನಿಮಿಷ)',
 
       // Verification & Reporting
       bin_verified: 'ಪರಿಶೀಲಿಸಲಾಗಿದೆ! {name} ಅವರ ಬಿನ್ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ. +10 ಅಂಕ ನೀಡಲಾಗಿದೆ. 🎉',

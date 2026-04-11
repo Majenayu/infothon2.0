@@ -64,7 +64,10 @@ const MapModule = (() => {
   }
 
   function initMap() {
-    if (!ECOROUTE_CONFIG.MAPBOX_TOKEN || ECOROUTE_CONFIG.MAPBOX_TOKEN === 'YOUR_MAPBOX_TOKEN_HERE') {
+    const isDemo = localStorage.getItem('eco_demo') === 'true';
+    const noToken = !ECOROUTE_CONFIG.MAPBOX_TOKEN || ECOROUTE_CONFIG.MAPBOX_TOKEN === 'YOUR_MAPBOX_TOKEN_HERE';
+
+    if (noToken && !isDemo) {
       document.getElementById('map-container').innerHTML = `
         <div style="
           height:100%;display:flex;flex-direction:column;
@@ -683,14 +686,21 @@ const MapModule = (() => {
     });
   }
 
-  async function routeToNearestPoint() {
+  async function routeToNearestPoint(forcedLng, forcedLat) {
     if (!map) return;
-    const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
-    if (!userLoc) {
-      App.showToast('Cannot detect your location.', 'error');
-      return;
+
+    let userLng = forcedLng;
+    let userLat = forcedLat;
+
+    if (!userLng || !userLat) {
+        const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
+        if (!userLoc) {
+          App.showToast(I18n.t('location_error'), 'error');
+          return;
+        }
+        userLng = userLoc.lng;
+        userLat = userLoc.lat;
     }
-    const { lng: userLng, lat: userLat } = userLoc;
 
     const points = MOCK_USERS.filter(u => u.role === 'point');
     if (points.length === 0) return;
@@ -714,11 +724,19 @@ const MapModule = (() => {
 
       drawRoute(data.routes[0].geometry);
       
+      const distance = Math.round(data.routes[0].distance);
+      const minutes  = Math.ceil(data.routes[0].duration / 60);
+
       const bounds = new mapboxgl.LngLatBounds([userLng, userLat], [userLng, userLat]);
       bounds.extend(dest);
       map.fitBounds(bounds, { padding: 80, duration: 1000 });
       
-      App.showToast(`Walking route to ${nearest.properties.name} generated`, 'success');
+      const msg = I18n.t('walking_route_gen', { 
+        name: nearest.properties.name,
+        dist: distance,
+        time: minutes
+      });
+      App.showToast(msg, 'success');
       
     } catch(e) {
       console.warn('Failed to route to point', e);
