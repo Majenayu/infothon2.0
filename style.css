@@ -730,6 +730,46 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
 /* ════════════════════════════════════════════════════════
    HISTORY SCREEN
 ════════════════════════════════════════════════════════ */
+.history-tabs {
+  display: flex; margin: 16px 20px 0;
+  background: var(--bg3); border-radius: var(--radius-sm); padding: 4px;
+}
+.history-tab {
+  flex: 1; padding: 8px; text-align: center;
+  border-radius: 8px; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all .2s; color: var(--text2);
+}
+.history-tab.active { background: var(--orange); color: #fff; }
+
+.monthly-summary {
+  margin: 0 20px; padding: 14px 16px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.monthly-summary-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.9rem; font-weight: 600; margin-bottom: 8px;
+}
+.monthly-badge {
+  font-size: 0.72rem; color: var(--green);
+  background: var(--green-glow); padding: 3px 10px; border-radius: 50px;
+}
+.monthly-bar-row {
+  height: 4px; background: var(--bg4); border-radius: 4px; overflow: hidden; margin-bottom: 6px;
+}
+.monthly-bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--orange), var(--green));
+  border-radius: 4px; transition: width 1s ease;
+}
+.monthly-summary-stats { font-size: 0.78rem; color: var(--text2); }
+
+.history-list { display: flex; flex-direction: column; gap: 10px; padding: 0 20px; }
+.history-item {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  transition: border-color .2s;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

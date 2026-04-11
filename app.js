@@ -1037,56 +1037,65 @@ const App = (() => {
       const list = document.getElementById('history-list');
 
       if (currentRole === 'driver') {
-        renderDriverHistoryList();
-        return;
-      }
+        if (!list) return;
+        if (summaries.length === 0) {
+          list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No collection history recorded yet.</div>';
+          return;
+        }
 
-      if (list) list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No past collections found.</div>';
-    }
-  }
+        list.innerHTML = summaries.map(h => {
+          const dt = new Date(h.date);
+          const dateStr = dt.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
+          return `
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+               <div style="flex:1;">
+                  <div style="font-size:0.95rem;font-weight:700;color:var(--text1);">${dateStr}</div>
+                  <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;">Shift: Morning Session</div>
+               </div>
+               <div style="display:flex;gap:15px;text-align:right;">
+                  <div>
+                     <div style="font-size:1rem;font-weight:700;color:var(--green);">${h.housePickups || 0}</div>
+                     <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;">Pickups</div>
+                  </div>
+                  <div>
+                     <div style="font-size:1rem;font-weight:700;color:var(--orange);">${h.pointsDistributed || 0}</div>
+                     <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;">Pts Given</div>
+                  </div>
+               </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        if (!list) return;
+        if (logs.length === 0) {
+          list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No past collections found.</div>';
+          return;
+        }
 
-  // ─ Feature 7: Render Driver History List (Stacked Cards) ────
-  async function renderDriverHistoryList() {
-    const grid = document.getElementById('calendar-grid');
-    if (!grid) return;
-    grid.style.display = 'block'; // switch from grid to flex/block for this view
-    grid.style.minHeight = '300px';
-
-    try {
-      let histories = [];
-      if (!demoMode) {
-        histories = await ApiModule.getDriverHistory();
-      }
-
-      if (histories.length === 0) {
-        grid.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text3);">No collection history recorded yet.</div>';
-        return;
-      }
-
-      grid.innerHTML = histories.map(h => {
-        const dt = new Date(h.date);
-        const dateStr = dt.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
-        return `
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-             <div style="flex:1;">
-                <div style="font-size:0.95rem;font-weight:700;color:var(--text1);">${dateStr}</div>
-                <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;">Shift: Morning Session</div>
-             </div>
-             <div style="display:flex;gap:15px;text-align:right;">
-                <div>
-                   <div style="font-size:1rem;font-weight:700;color:var(--green);">${h.housePickups || 0}</div>
-                   <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;">Pickups</div>
+        list.innerHTML = logs.map(l => {
+          const dt = new Date(l.date);
+          const dateStr = dt.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
+          const isCollected = l.status === 'collected';
+          const dotStyle = isCollected ? 'background:var(--green); box-shadow:0 0 6px var(--green);' : 'background:var(--red); box-shadow:0 0 6px var(--red);';
+          return `
+            <div class="history-item">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:600; font-size:0.85rem;">${dateStr}</div>
+                <div style="font-weight:600; font-size:0.85rem; color:${isCollected ? 'var(--green)' : 'var(--red)'}; text-transform:capitalize;">
+                  ${l.status}
                 </div>
-                <div>
-                   <div style="font-size:1rem;font-weight:700;color:var(--orange);">${h.pointsDistributed || 0}</div>
-                   <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;">Pts Given</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.75rem; color:var(--text3);">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <div style="width:6px;height:6px;border-radius:50%;${dotStyle}"></div>
+                  Points Earned
                 </div>
-             </div>
-          </div>
-        `;
-      }).join('');
-    } catch (e) {
-      grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);">Failed to load history data.</div>';
+                <div style="color:var(--orange); font-weight:700;">+${l.points || 0}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
   }
 
