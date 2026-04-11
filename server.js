@@ -150,16 +150,21 @@ async function seedMocks() {
   
   console.log('🌱 Seeding Gokulam geometric mock users...');
   const initialMocks = [
-    { id: 'U001', name: 'Rahul Sharma', role: 'home', address: 'Vijayanagar 1st Stage, Mysuru', area: 'gokulam_north', lng: 76.6082, lat: 12.3258, fillLevel: 85, lastReported: '2 hrs ago', points: 1250 },
-    { id: 'U002', name: 'Priya Nair', role: 'home', address: 'Kuvempunagar, Mysuru', area: 'gokulam_south', lng: 76.6231, lat: 12.3441, fillLevel: 45, lastReported: '5 hrs ago', points: 870 },
-    { id: 'U003', name: 'Bin — Saraswathipuram', role: 'point', address: 'Saraswathipuram Main Road', area: 'gokulam_east', lng: 76.6358, lat: 12.3312, fillLevel: 92, lastReported: '1 hr ago', points: 2100 },
-    { id: 'U004', name: 'Deepak Hegde', role: 'home', address: 'Jayalakshmipuram, Mysuru', area: 'gokulam_west', lng: 76.6501, lat: 12.3189, fillLevel: 78, lastReported: '3 hrs ago', points: 540 },
-    { id: 'U005', name: 'Bin — Gokulam', role: 'point', address: 'Gokulam 3rd Stage', area: 'gokulam_north', lng: 76.6143, lat: 12.3502, fillLevel: 33, lastReported: '8 hrs ago', points: 1680 },
-    { id: 'U006', name: 'Anitha Reddy', role: 'home', address: 'Rajivnagar, Mysuru', area: 'jayalakshmipuram', lng: 76.6620, lat: 12.3390, fillLevel: 73, lastReported: '2 hrs ago', points: 990 },
-    { id: 'U007', name: 'Bin — Nazarbad', role: 'point', address: 'Nazarbad Mohalla', area: 'gokulam_south', lng: 76.6432, lat: 12.3088, fillLevel: 88, lastReported: '30 mins ago', points: 3200 },
-    { id: 'U008', name: 'Suresh Kumar', role: 'home', address: 'Hebbal 2nd Stage, Mysuru', area: 'gokulam_east', lng: 76.6195, lat: 12.2980, fillLevel: 55, lastReported: '6 hrs ago', points: 430 },
-    { id: 'U009', name: 'Meera Iyengar', role: 'home', address: 'Lashkar Mohalla, Mysuru', area: 'jayalakshmipuram', lng: 76.6553, lat: 12.3055, fillLevel: 95, lastReported: '45 mins ago', points: 1870 },
-    { id: 'U010', name: 'Bin — Devaraja', role: 'point', address: 'Devaraja Urs Road', area: 'gokulam_west', lng: 76.6388, lat: 12.2940, fillLevel: 62, lastReported: '4 hrs ago', points: 760 }
+    // gokulam_north box: lng 76.600-76.620, lat 12.318-12.358
+    { id: 'U001', name: 'Rahul Sharma',       role: 'home',  address: 'Gokulam 1st Stage, Mysuru',   area: 'gokulam_north',    lng: 76.608, lat: 12.326, fillLevel: 85, lastReported: '2 hrs ago',  points: 1250 },
+    { id: 'U005', name: 'Bin — Gokulam',       role: 'point', address: 'Gokulam 3rd Stage, Mysuru',   area: 'gokulam_north',    lng: 76.614, lat: 12.350, fillLevel: 33, lastReported: '8 hrs ago',  points: 1680 },
+    // gokulam_south box: lng 76.618-76.650, lat 12.300-12.352
+    { id: 'U002', name: 'Priya Nair',          role: 'home',  address: 'Kuvempunagar, Mysuru',         area: 'gokulam_south',    lng: 76.623, lat: 12.344, fillLevel: 45, lastReported: '5 hrs ago',  points:  870 },
+    { id: 'U007', name: 'Bin — Nazarbad',      role: 'point', address: 'Nazarbad Mohalla, Mysuru',    area: 'gokulam_south',    lng: 76.643, lat: 12.309, fillLevel: 88, lastReported: '30 mins ago', points: 3200 },
+    // gokulam_east box: lng 76.615-76.645, lat 12.290-12.340
+    { id: 'U003', name: 'Bin — Saraswathipuram', role: 'point', address: 'Saraswathipuram Main Road', area: 'gokulam_east',    lng: 76.636, lat: 12.331, fillLevel: 92, lastReported: '1 hr ago',   points: 2100 },
+    { id: 'U008', name: 'Suresh Kumar',        role: 'home',  address: 'Hebbal 2nd Stage, Mysuru',    area: 'gokulam_east',     lng: 76.620, lat: 12.298, fillLevel: 55, lastReported: '6 hrs ago',  points:  430 },
+    // gokulam_west box: lng 76.630-76.660, lat 12.285-12.330
+    { id: 'U004', name: 'Deepak Hegde',        role: 'home',  address: 'Jayalakshmipuram, Mysuru',    area: 'gokulam_west',     lng: 76.650, lat: 12.319, fillLevel: 78, lastReported: '3 hrs ago',  points:  540 },
+    { id: 'U010', name: 'Bin — Devaraja',      role: 'point', address: 'Devaraja Urs Road, Mysuru',  area: 'gokulam_west',     lng: 76.639, lat: 12.294, fillLevel: 62, lastReported: '4 hrs ago',  points:  760 },
+    // jayalakshmipuram box: lng 76.645-76.672, lat 12.295-12.350
+    { id: 'U006', name: 'Anitha Reddy',        role: 'home',  address: 'Rajivnagar, Mysuru',          area: 'jayalakshmipuram', lng: 76.662, lat: 12.339, fillLevel: 73, lastReported: '2 hrs ago',  points:  990 },
+    { id: 'U009', name: 'Meera Iyengar',       role: 'home',  address: 'Lashkar Mohalla, Mysuru',     area: 'jayalakshmipuram', lng: 76.655, lat: 12.306, fillLevel: 95, lastReported: '45 mins ago', points: 1870 }
   ];
   await MockUser.insertMany(initialMocks);
   

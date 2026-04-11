@@ -199,21 +199,29 @@ const MapModule = (() => {
     await drawDriverBoundaries();
   }
 
+  // Zone polygons are aligned to the ACTUAL coordinates of seeded mock users.
+  // Each box is [lng_west, lat_south] → [lng_east, lat_south] → [lng_east, lat_north] → [lng_west, lat_north] → close
   const ZONE_POLYGONS = {
-    'gokulam_north': [[76.600, 12.335], [76.620, 12.335], [76.620, 12.355], [76.600, 12.355], [76.600, 12.335]],
-    'gokulam_south': [[76.620, 12.335], [76.645, 12.335], [76.645, 12.355], [76.620, 12.355], [76.620, 12.335]],
-    'gokulam_east':  [[76.600, 12.315], [76.620, 12.315], [76.620, 12.335], [76.600, 12.335], [76.600, 12.315]],
-    'gokulam_west':  [[76.620, 12.315], [76.645, 12.315], [76.645, 12.335], [76.620, 12.335], [76.620, 12.315]],
-    'jayalakshmipuram': [[76.645, 12.315], [76.665, 12.315], [76.665, 12.355], [76.645, 12.355], [76.645, 12.315]]
+    // gokulam_north  — users U001 (76.608,12.326), U005 (76.614,12.350)
+    'gokulam_north':    [[76.600, 12.318], [76.620, 12.318], [76.620, 12.358], [76.600, 12.358], [76.600, 12.318]],
+    // gokulam_south  — users U002 (76.623,12.344), U007 (76.643,12.309)
+    'gokulam_south':    [[76.618, 12.300], [76.650, 12.300], [76.650, 12.352], [76.618, 12.352], [76.618, 12.300]],
+    // gokulam_east   — users U003 (76.636,12.331), U008 (76.620,12.298)
+    'gokulam_east':     [[76.615, 12.290], [76.645, 12.290], [76.645, 12.340], [76.615, 12.340], [76.615, 12.290]],
+    // gokulam_west   — users U004 (76.650,12.319), U010 (76.639,12.294)
+    'gokulam_west':     [[76.630, 12.285], [76.660, 12.285], [76.660, 12.330], [76.630, 12.330], [76.630, 12.285]],
+    // jayalakshmipuram — users U006 (76.662,12.339), U009 (76.655,12.306)
+    'jayalakshmipuram': [[76.645, 12.295], [76.672, 12.295], [76.672, 12.350], [76.645, 12.350], [76.645, 12.295]]
   };
 
   async function drawDriverBoundaries() {
     if (!window.App || App.getCurrentRole() !== 'driver' || !window.ApiModule) return;
     try {
-      const response = await ApiModule.getMe();
-      if (!response.user || !response.user.assignedAreas) return;
+      // getMe() returns the flat user object directly (not { user: ... })
+      const driverUser = await ApiModule.getMe();
+      if (!driverUser || !driverUser.assignedAreas || driverUser.assignedAreas.length === 0) return;
       
-      const areas = response.user.assignedAreas;
+      const areas = driverUser.assignedAreas;
       const allZones = Object.keys(ZONE_POLYGONS);
       
       allZones.forEach(zone => {

@@ -8,8 +8,8 @@ const ECOROUTE_CONFIG = {
 
   // Map settings
   MAP_STYLE: 'mapbox://styles/mapbox/satellite-streets-v12',
-  DEFAULT_CENTER: [76.6143, 12.3502], // Gokulam, Mysuru, Karnataka
-  DEFAULT_ZOOM: 15,
+  DEFAULT_CENTER: [76.638, 12.322], // Centroid of all 5 Gokulam zone boxes, Mysuru
+  DEFAULT_ZOOM: 14,
 
   // Depot and dump yard
   DEPOT: { lng: 76.6180, lat: 12.3050, name: 'Hebbal Depot' },
