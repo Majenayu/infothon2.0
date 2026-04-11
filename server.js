@@ -581,25 +581,18 @@ app.post('/api/driver/unblock', requireAuth, requireDb, async (req, res) => {
   }
 });
 
-// GET /api/driver/location — Fetch an active driver's location for users
-app.get('/api/driver/location', requireDb, async (req, res) => {
-  try {
-    const driver = await User.findOne({ role: 'driver', isOnline: true }).select('location isOnline name');
-    if (!driver || !driver.location) {
-      return res.json({ available: false });
-    }
-    res.json({ available: true, location: driver.location, name: driver.name });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
 // POST /api/driver/online
 app.post('/api/driver/online', requireAuth, requireDb, async (req, res) => {
   try {
     const { isOnline, location } = req.body;
     const updates = { isOnline };
-    if (location) updates.location = location;
+    
+    // If going offline, remove the location from DB to protect privacy
+    if (isOnline === false) {
+      updates.location = { lat: 0, lng: 0 };
+    } else if (location) {
+      updates.location = location;
+    }
     
     const user = await User.findOneAndUpdate(
       { _id: req.user.id, role: 'driver' },
@@ -613,16 +606,14 @@ app.post('/api/driver/online', requireAuth, requireDb, async (req, res) => {
   }
 });
 
-// GET /api/driver/location (Home users find specific driver covering their zone)
+// GET /api/driver/location (Users find active driver)
 app.get('/api/driver/location', requireAuth, requireDb, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    
+    // Find any online driver with valid location
     const driver = await User.findOne({ 
       role: 'driver', 
       isOnline: true,
-      assignedAreas: user.area 
+      'location.lat': { $ne: 0 }
     });
     
     if (!driver) return res.json({ available: false });

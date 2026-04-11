@@ -115,7 +115,7 @@ const ApiModule = (() => {
   async function unblockLocationUpdates() {
     return await request('POST', '/api/driver/unblock');
   }
-  async function updateDriverOnline(isOnline, location = null) {
+  async function setDriverOnline(isOnline, location) {
     return await request('POST', '/api/driver/online', { isOnline, location });
   }
   async function getDriverLocation() {

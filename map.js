@@ -383,40 +383,55 @@ const MapModule = (() => {
   }
 
   let driverWasOnline = false;
+  // Feature 3: H-User proximity — only fire the 20m alert once per browser session
+  let proximityNotifiedThisSession = false;
+
   async function pollDriverLocation() {
-    if (!ECOROUTE_CONFIG.MAPBOX_TOKEN) return;
     try {
-      if (!window.ApiModule) return;
-      const res = await ApiModule.getDriverLocation();
-      
-      if (res && res.available && res.location) {
+      const loc = await ApiModule.getDriverLocation();
+      if (loc && loc.available && loc.location && loc.location.lng) {
         if (!driverWasOnline) {
-          App.showToast(`🚛 ${res.name || 'Driver'} is now Online! Tracking Live.`, 'success');
+          App.showToast('🚛 Driver is now Online! Tracking Live.', 'success');
+          if ('Notification' in window && Notification.permission === 'granted') {
+             new Notification('EcoRoute - Driver Assigned', {
+               body: 'Your collection driver is on the route and heading to your area!'
+             });
+          }
         }
         driverWasOnline = true;
-        updateDriverMarker(res.location.lng, res.location.lat);
+        updateDriverMarker(loc.location.lng, loc.location.lat);
 
+        // Feature 6: Draw Live Street Route (Truck to House)
         const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
         if (userLoc) {
-          updateLiveStreetRoute(res.location, userLoc);
-          if (userLoc.lat && userLoc.lng) updateLiveUserMarker(userLoc.lng, userLoc.lat);
+          updateLiveStreetRoute(loc.location, userLoc);
+          
+          // Show Live "You" Marker if coordinates are available
+          if (userLoc.lat && userLoc.lng) {
+            updateLiveUserMarker(userLoc.lng, userLoc.lat);
+          }
 
+          // GENERATE VIEW: Auto-zoom once to show user and truck
           if (!mapGeneratedForObserver) {
-             const bounds = new mapboxgl.LngLatBounds().extend([res.location.lng, res.location.lat]).extend([userLoc.lng, userLoc.lat]);
+             const bounds = new mapboxgl.LngLatBounds()
+                .extend([loc.location.lng, loc.location.lat])
+                .extend([userLoc.lng, userLoc.lat]);
              map.fitBounds(bounds, { padding: 90, duration: 2000 });
              mapGeneratedForObserver = true;
           }
         }
+
       } else {
-        // Driver is offline or unavailable
         if (driverWasOnline) {
           App.showToast('Driver has gone offline.', 'info');
         }
         driverWasOnline = false;
+        mapGeneratedForObserver = false; // Allow map to re-generate when driver comes back
+        proximityNotifiedThisSession = false; // reset on driver offline
         if (truckMarker) { truckMarker.remove(); truckMarker = null; }
         removeLiveConnectionLine();
       }
-    } catch(e) { console.warn('Poll failed', e); }
+    } catch(e) {}
   }
 
   // Feature 6: Real street-following route (Truck to House)

@@ -1562,35 +1562,6 @@ const App = (() => {
     }, 1600);
   }
 
-  let driverSyncInterval = null;
-  async function toggleDriverOnline(isOnline) {
-    try {
-      if (isOnline) {
-        // Feature 6: Ensure coordinates are captured before sync
-        const loc = liveCoords || user?.location;
-        await ApiModule.updateDriverOnline(true, loc);
-        
-        // Start background sync every 10s
-        if (driverSyncInterval) clearInterval(driverSyncInterval);
-        driverSyncInterval = setInterval(() => {
-          if (liveCoords) {
-            ApiModule.updateDriverOnline(true, liveCoords).catch(e => console.warn('Sync failed', e));
-          }
-        }, 10000);
-
-        showToast('You are now ONLINE!', 'success');
-      } else {
-        // Clear sync
-        if (driverSyncInterval) {
-          clearInterval(driverSyncInterval);
-          driverSyncInterval = null;
-        }
-        await ApiModule.updateDriverOnline(false);
-        showToast('You are now OFFLINE', 'info');
-      }
-    } catch (e) { showToast(e.message, 'error'); }
-  }
-
   // ════════════════════════════════════════════════════════
   //  INIT
   // ════════════════════════════════════════════════════════
