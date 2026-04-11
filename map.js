@@ -187,6 +187,13 @@ const MapModule = (() => {
       pill.innerHTML = `🏠 ${hCount} Houses | 🗑️ ${bCount} Bins ${isFallback ? '(Demo Mode)' : ''}`;
       pill.style.display = 'block';
     }
+    
+    // AUTO-FIT: Zoom map to show all discovered markers across all regions
+    if (userMarkers.length > 0) {
+       const bounds = new mapboxgl.LngLatBounds();
+       userMarkers.forEach(m => bounds.extend(m.getLngLat()));
+       map.fitBounds(bounds, { padding: 100, maxZoom: 15, duration: 1000 });
+    }
 
     // Draw driver bounding areas visually
     await drawDriverBoundaries();

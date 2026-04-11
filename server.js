@@ -437,26 +437,8 @@ app.patch('/api/bins/:id/fill', requireAuth, requireDb, async (req, res) => {
 
 // GET /api/users/active
 app.get('/api/users/active', requireDb, async (req, res) => {
-  try {
-    // 1. Determine driver's bounded areas
-    let assignedAreas = null;
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-        if (decoded.role === 'driver') {
-          const d = await User.findById(decoded.id);
-          if (d && d.assignedAreas && d.assignedAreas.length > 0) {
-            assignedAreas = d.assignedAreas;
-          }
-        }
-      } catch (e) { /* unauthenticated or fake demo token */ }
-    }
-
-    // 2. Fetch real users (Relaxed filter for drivers in demo)
+    // 1. Fetch real users (Universal filter for drivers in demo)
     let query = { role: { $in: ['home', 'point'] } };
-    // if (assignedAreas) query.area = { $in: assignedAreas }; // Bypass for demo
     const realUsers = await User.find(query);
     const mappedReal = realUsers.map(user => ({
       id: user._id,
