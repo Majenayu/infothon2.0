@@ -971,16 +971,18 @@ const App = (() => {
       if (screenCal) screenCal.style.display = 'block';
       if (screenList) screenList.style.display = 'none';
       
-      // For drivers, the "calendar" tab actually shows the stacked summary list
-      if (currentRole === 'driver') {
-        renderDriverHistoryList();
-        return;
-      }
-
       let logs = [];
-      if (!demoMode) {
-        try { logs = await ApiModule.getCollectionLog(); } catch(e){}
-      }
+      let summaries = [];
+
+      try {
+        if (!demoMode) {
+          if (currentRole === 'driver') {
+            summaries = await ApiModule.getDriverHistory();
+          } else {
+            logs = await ApiModule.getCollectionLog();
+          }
+        }
+      } catch(e) { console.warn('History fetch fail', e); }
       
       const grid = document.getElementById('calendar-grid');
       const monthName = document.getElementById('calendar-month-name');
@@ -995,37 +997,50 @@ const App = (() => {
       const dayNames = ['S','M','T','W','T','F','S'];
       let html = dayNames.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
       
-      for(let i=0; i<firstDay; i++) {
+      for (let i=0; i<firstDay; i++) {
         html += `<div class="calendar-day empty"></div>`;
       }
       
-      for(let day=1; day<=daysInMonth; day++) {
+      for (let day=1; day<=daysInMonth; day++) {
         const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        const log = logs.find(l => l.date === dateStr);
-        let cls = '', dot = '';
-        if (log) {
-          cls = log.status === 'collected' ? 'collected' : 'missed';
-          dot = log.status === 'collected' ? '<div class="calendar-dot green"></div>' : '<div class="calendar-dot red"></div>';
+        
+        let content = '';
+        let dayClass = '';
+        const isToday = (day === today.getDate());
+
+        if (currentRole === 'driver') {
+          const sum = summaries.find(s => s.date === dateStr);
+          if (sum) {
+            content = `<div class="calendar-day-stat">${sum.housePickups || 0}</div>`;
+            dayClass = 'active';
+          }
+        } else {
+          const log = logs.find(l => l.date === dateStr);
+          if (log) {
+            content = log.status === 'collected' 
+              ? '<div class="calendar-dot green"></div>' 
+              : '<div class="calendar-dot red"></div>';
+            dayClass = log.status;
+          }
         }
         
-        const isToday = day === today.getDate();
         html += `
-          <div class="calendar-day ${cls}">
+          <div class="calendar-day ${dayClass} ${isToday ? 'today' : ''}">
             <span class="calendar-day-date">${day}</span>
-            ${dot}
-            ${isToday ? '<div style="position:absolute;bottom:-12px;font-size:0.6rem;color:var(--orange);font-weight:700;">Today</div>' : ''}
+            ${content}
           </div>
         `;
       }
       grid.innerHTML = html;
+      grid.style.display = 'grid'; // Ensure grid layout
     } else {
       if (screenCal) screenCal.style.display = 'none';
       if (screenList) screenList.style.display = 'block';
       const list = document.getElementById('history-list');
 
       if (currentRole === 'driver') {
-         if (list) list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">Detailed logs coming soon.</div>';
-         return;
+        renderDriverHistoryList();
+        return;
       }
 
       if (list) list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No past collections found.</div>';

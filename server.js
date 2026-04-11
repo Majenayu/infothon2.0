@@ -159,22 +159,27 @@ async function seedMocks() {
   // Seed User Collection History (Real users & Mocks)
   const logCount = await CollectionLog.countDocuments();
   if (logCount === 0) {
-    console.log('🌱 Seeding sample collection logs...');
+    console.log('🌱 Seeding sample collection logs for last 14 days...');
     const sampleLogs = [];
-    const dateStrings = ['2026-04-10', '2026-04-09', '2026-04-08', '2026-04-07', '2026-04-06'];
-    
-    // Inject logs for initial users
     const allUsers = await User.find({ role: 'home' });
-    allUsers.forEach(u => {
-      dateStrings.forEach((d, idx) => {
-        sampleLogs.push({
-          userId: u._id,
-          date: d,
-          status: idx % 3 === 0 ? 'missed' : 'collected',
-          points: idx % 3 === 0 ? 0 : 50
-        });
+    
+    for (let i = 1; i <= 14; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dStr = d.toISOString().split('T')[0];
+      
+      allUsers.forEach((u, idx) => {
+        // 80% collection rate
+        if ((idx + i) % 5 !== 0) {
+          sampleLogs.push({
+            userId: u._id,
+            date: dStr,
+            status: (idx + i) % 7 === 0 ? 'missed' : 'collected',
+            points: (idx + i) % 7 === 0 ? 0 : 50
+          });
+        }
       });
-    });
+    }
     if (sampleLogs.length > 0) await CollectionLog.insertMany(sampleLogs);
   }
 
@@ -183,15 +188,25 @@ async function seedMocks() {
   if (summaryCount === 0) {
     const drivers = await User.find({ role: 'driver' });
     if (drivers.length > 0) {
-      console.log('🌱 Seeding sample driver summaries...');
-      const sampleSummaries = drivers.map(d => ({
-        driverId: d._id,
-        date: '2026-04-10',
-        housePickups: 12,
-        communityVerifications: 4,
-        pointsDistributed: 800,
-        verifiedBins: []
-      }));
+      console.log('🌱 Seeding sample driver summaries for last 14 days...');
+      const sampleSummaries = [];
+      
+      for (let i = 1; i <= 14; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dStr = d.toISOString().split('T')[0];
+        
+        drivers.forEach(dr => {
+          sampleSummaries.push({
+            driverId: dr._id,
+            date: dStr,
+            housePickups: Math.floor(Math.random() * 20) + 15,
+            communityVerifications: Math.floor(Math.random() * 6) + 3,
+            pointsDistributed: Math.floor(Math.random() * 1200) + 600,
+            verifiedBins: []
+          });
+        });
+      }
       await DriverDailySummary.insertMany(sampleSummaries);
     }
   }
