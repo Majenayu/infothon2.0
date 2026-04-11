@@ -1443,23 +1443,70 @@ const App = (() => {
     document.getElementById('pwa-install-popup')?.classList.add('show');
   }
 
-  // Handle bottom sheet interaction (Driver map)
+  // ════════════════════════════════════════════════════════
+  //  PANEL GESTURES (BOTTOM SHEET)
+  // ════════════════════════════════════════════════════════
+  let sheetY = 0;
+  let startY = 0;
+  let isDragging = false;
+
   function setupBottomSheet() {
     const handle = document.querySelector('.sheet-handle');
     const sheet  = document.querySelector('.bottom-sheet');
+    const fab    = document.getElementById('show-route-fab');
     if (!handle || !sheet) return;
 
-    handle.addEventListener('click', () => {
-      sheet.classList.toggle('collapsed');
-      if (sheet.classList.contains('collapsed')) {
-        sheet.style.transform = 'translateY(calc(100% - 40px))';
+    handle.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      sheet.classList.add('is-dragging');
+      isDragging = true;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const currentY = e.touches[0].clientY;
+      const deltaY = currentY - startY;
+
+      // Prevent dragging too high
+      if (deltaY < -20) return; 
+
+      sheet.style.transform = `translateY(${Math.max(0, deltaY)}px)`;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      sheet.classList.remove('is-dragging');
+
+      const endY = sheet.style.transform.replace(/[^0-9.]/g, '') || 0;
+      const threshold = 100;
+
+      if (parseFloat(endY) > threshold) {
+        toggleBottomSheet(false); // Hide
       } else {
-        sheet.style.transform = 'translateY(0)';
+        toggleBottomSheet(true);  // Restore
       }
     });
 
-    // Also hide on start if needed
-    sheet.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+    // Fallback click for desktop
+    handle.addEventListener('click', () => {
+      const isCurrentlyHidden = sheet.style.transform.includes('100%');
+      toggleBottomSheet(!isCurrentlyHidden);
+    });
+  }
+
+  function toggleBottomSheet(show) {
+    const sheet = document.querySelector('.bottom-sheet');
+    const fab   = document.getElementById('show-route-fab');
+    if (!sheet) return;
+
+    if (show) {
+      sheet.style.transform = 'translateY(0)';
+      if (fab) fab.style.display = 'none';
+    } else {
+      sheet.style.transform = 'translateY(calc(100% - 10px))';
+      if (fab) fab.style.display = 'flex';
+    }
   }
 
   function hidePWAPopup() {
@@ -1593,6 +1640,7 @@ const App = (() => {
     // Feature 2: Morning notification trigger
     triggerMorningNotification,
     findNearestPoint,
+    toggleBottomSheet,
     openModal, closeModal,
     openRedeemModal, confirmRedeem,
     openProfileEdit, saveProfile,

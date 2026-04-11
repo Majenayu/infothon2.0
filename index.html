@@ -497,6 +497,14 @@
 ══════════════════════════════════════════════════════ -->
 <section id="screen-map" class="screen" style="padding-bottom:0;position:relative;overflow:hidden;height:calc(100dvh - 58px);">
   <div id="map-container" style="position:absolute;inset:0;width:100%;height:100%;"></div>
+  
+  <button id="show-route-fab" class="show-route-fab" onclick="App.toggleBottomSheet(true)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+    Show Route Details
+  </button>
 
   <div class="map-overlay-top">
     <div style="display:flex;flex-direction:column;">

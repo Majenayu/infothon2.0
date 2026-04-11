@@ -152,7 +152,7 @@ const MapModule = (() => {
       el.innerHTML = pinSVG(color, icon);
       el.style.zIndex = isBin ? '10' : '999'; // Force houses to the very front
       if (!isBin) {
-        el.style.transform = 'scale(1.2)'; // Refined scale
+        el.style.transform = 'scale(1.05)'; // Refined scale
         el.style.filter = 'drop-shadow(0 0 10px rgba(255,215,0,0.8))'; // Glow effect
       }
 
