@@ -94,8 +94,14 @@ const MapModule = (() => {
     let usersToShow = [];
     let isFallback = false;
 
-    const currentRole = (window.App && typeof App.getCurrentRole === 'function') ? App.getCurrentRole() : 'home';
+    let currentRole = (window.App && typeof App.getCurrentRole === 'function') ? App.getCurrentRole() : 'home';
     const currentUser = (window.App && typeof App.getCurrentUser === 'function') ? App.getCurrentUser() : null;
+
+    // AGGRESSIVE OVERRIDE: If the UI says "Driver View", we are a driver.
+    const mapLabel = document.getElementById('map-mode-label');
+    if (mapLabel && mapLabel.textContent.includes('Driver')) {
+       currentRole = 'driver';
+    }
 
     try {
       const headers = {};
@@ -118,9 +124,8 @@ const MapModule = (() => {
 
     usersToShow.forEach(user => {
       // DRIVER: Sees EVERYTHING in demo
-      // OTHERS: Only see community points and their own location
       if (currentRole !== 'driver') {
-         if (user.role !== 'point' && (!currentUser || user.id !== currentUser.id)) {
+         if ((user.role || '').toLowerCase() !== 'point' && (!currentUser || user.id !== currentUser.id)) {
            return;
          }
       }
@@ -135,13 +140,21 @@ const MapModule = (() => {
       const isActiveReady = user.isActiveToday === true || (user.isActiveToday === null && fill >= 70);
       
       const isBin = (user.role || '').toLowerCase() === 'point';
-      const color = isBin ? (isActiveReady ? '#22C55E' : '#EF4444') : '#3B82F6'; // Blue for houses
-      const icon  = isBin ? '🗑️' : '🏠';
+      
+      // HIGH VISIBILITY OVERHAUL:
+      // Bins: Green/Red Teardrop with 🗑️
+      // Houses: Golden Teardrop with ⭐ for High Visibility
+      const color = isBin ? (isActiveReady ? '#22C55E' : '#EF4444') : '#FFD700'; 
+      const icon  = isBin ? '🗑️' : '⭐';
 
       const el = document.createElement('div');
       el.className = 'eco-marker';
       el.innerHTML = pinSVG(color, icon);
-      if (!isBin) el.style.zIndex = '50';
+      el.style.zIndex = isBin ? '10' : '999'; // Force houses to the very front
+      if (!isBin) {
+        el.style.transform = 'scale(1.3)'; // Make houses much bigger
+        el.style.filter = 'drop-shadow(0 0 10px rgba(255,215,0,0.8))'; // Glow effect
+      }
 
       const popup = new mapboxgl.Popup({ offset: 30, closeButton: false, className: 'eco-popup' })
         .setHTML(`

@@ -461,11 +461,11 @@ app.get('/api/users/active', requireDb, async (req, res) => {
     const mappedReal = realUsers.map(user => ({
       id: user._id,
       name: user.name,
-      role: user.role,
+      role: (user.role || 'home').toLowerCase(),
       area: user.area,
       address: user.address,
-      lat: user.location?.lat || user.lat,
-      lng: user.location?.lng || user.lng,
+      lat: (user.location?.lat || user.lat || 12.3375) + (Math.random() - 0.5) * 0.0001,
+      lng: (user.location?.lng || user.lng || 76.6394) + (Math.random() - 0.5) * 0.0001,
       fillLevel: user.fillLevel,
       isActiveToday: user.isActiveToday,
       isMock: false
@@ -473,7 +473,6 @@ app.get('/api/users/active', requireDb, async (req, res) => {
 
     // 3. Fetch mock users (Relaxed filter for drivers in demo)
     let mockQuery = {};
-    // if (assignedAreas) mockQuery.area = { $in: assignedAreas }; // Bypass for demo
     const mocks = await MockUser.find(mockQuery);
     const mappedMocks = mocks.map(m => ({
       id: m.id,
@@ -482,8 +481,8 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       isHouse: (m.role || 'home').toLowerCase() === 'home',
       area: m.area,
       address: m.address,
-      lat: Number(m.lat) || 12.3375,
-      lng: Number(m.lng) || 76.6394,
+      lat: (Number(m.lat) || 12.3375) + (Math.random() - 0.5) * 0.0001,
+      lng: (Number(m.lng) || 76.6394) + (Math.random() - 0.5) * 0.0001,
       fillLevel: m.fillLevel || Math.floor(Math.random() * 40) + 60,
       isActiveToday: null,
       isMock: true
