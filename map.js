@@ -217,13 +217,21 @@ const MapModule = (() => {
   };
 
   async function drawDriverBoundaries() {
-    if (!window.App || App.getCurrentRole() !== 'driver' || !window.ApiModule) return;
+    if (!window.App || App.getCurrentRole() !== 'driver') return;
     try {
-      // getMe() returns the flat user object directly (not { user: ... })
-      const driverUser = await ApiModule.getMe();
-      if (!driverUser || !driverUser.assignedAreas || driverUser.assignedAreas.length === 0) return;
+      // Synchronous fallback so it draws instantly even if backend is slow
+      let areas = [];
+      if (typeof App.getAssignedAreas === 'function') {
+        areas = App.getAssignedAreas();
+      }
       
-      const areas = driverUser.assignedAreas;
+      if (!areas || areas.length === 0) {
+        if (!window.ApiModule) return;
+        const driverUser = await ApiModule.getMe();
+        if (driverUser && driverUser.assignedAreas) areas = driverUser.assignedAreas;
+      }
+      
+      if (!areas || areas.length === 0) return;
       const allZones = Object.keys(ZONE_POLYGONS);
       
       allZones.forEach(zone => {

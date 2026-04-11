@@ -61,6 +61,7 @@ const userSchema = new mongoose.Schema({
   nextPickup: { type: String, default: 'TBD' },
   fillLevel: { type: Number, default: 85 },
   fcmToken: { type: String, default: null },
+  area: { type: String, default: '' }, // Add area to real user schema to fix strict Query drops
   // Driver-specific
   empId: { type: String, sparse: true },
   pin: { type: String },   // store hashed in production
