@@ -967,20 +967,20 @@ const App = (() => {
     const screenCal = document.getElementById('view-calendar');
     const screenList = document.getElementById('view-list');
     
+    let logs = [];
+    let summaries = [];
+
+    try {
+      if (currentRole === 'driver') {
+        summaries = await ApiModule.getDriverHistory();
+      } else {
+        logs = await ApiModule.getCollectionLog();
+      }
+    } catch(e) { console.warn('History fetch fail', e); }
+
     if (filter === 'calendar') {
       if (screenCal) screenCal.style.display = 'block';
       if (screenList) screenList.style.display = 'none';
-      
-      let logs = [];
-      let summaries = [];
-
-      try {
-        if (currentRole === 'driver') {
-          summaries = await ApiModule.getDriverHistory();
-        } else {
-          logs = await ApiModule.getCollectionLog();
-        }
-      } catch(e) { console.warn('History fetch fail', e); }
       
       const grid = document.getElementById('calendar-grid');
       const monthName = document.getElementById('calendar-month-name');
