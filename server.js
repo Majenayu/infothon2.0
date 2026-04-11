@@ -441,12 +441,10 @@ app.get('/api/users/active', requireDb, async (req, res) => {
     if (authHeader) {
       const token = authHeader.split(' ')[1];
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-        if (decoded.role === 'driver') {
-          const d = await User.findById(decoded.id);
-          if (d && d.assignedAreas && d.assignedAreas.length > 0) {
-            assignedAreas = d.assignedAreas;
-          }
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const d = await User.findById(decoded.id);
+        if (d && d.role === 'driver' && d.assignedAreas && d.assignedAreas.length > 0) {
+          assignedAreas = d.assignedAreas;
         }
       } catch (e) { /* unauthenticated or fake demo token */ }
     }

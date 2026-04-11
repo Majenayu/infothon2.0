@@ -483,33 +483,7 @@ const MapModule = (() => {
     step();
   }
 
-  async function addUserPins() {
-    clearUserMarkers();
-    
-    try {
-      // 1. Fetch Real Active Users
-      const res = await fetch('/api/users/active');
-      const realUsers = res.ok ? await res.json() : [];
-      
-      // 2. Fetch Admin Mock Users (Persistence feature)
-      let mockList = [];
-      try {
-        const mockRes = await ApiModule.getAdminMocks();
-        mockList = mockRes || [];
-      } catch(e) { 
-        console.warn('Mocks fetch failed, using static fallback');
-        mockList = MOCK_USERS; 
-      }
-      
-      // Filter mocks that aren't already represented by real users
-      const mockFiltered = mockList.filter(mu => !realUsers.some(ru => ru.name === mu.name));
-      const combined = [...realUsers, ...mockFiltered];
-
-      combined.forEach(user => {
-        // ... logic to add markers ...
-      });
-    } catch(e) { console.error(e); }
-  }
+  // (Duplicate addUserPins removed — the correctly-authorized version at line 84 is used)
 
   async function startCollectionRoute() {
     if (!map) return;
@@ -517,8 +491,12 @@ const MapModule = (() => {
     App.showToast('Fetching route...', 'info');
 
     try {
-      // 1. Fetch Unified Active Users (Real + DB Mocks)
-      const res = await fetch('/api/users/active');
+      // 1. Fetch Unified Active Users (Real + DB Mocks) — pass token so server filters by zone
+      const routeHeaders = {};
+      if (window.ApiModule && ApiModule.getToken()) {
+        routeHeaders['Authorization'] = `Bearer ${ApiModule.getToken()}`;
+      }
+      const res = await fetch('/api/users/active', { headers: routeHeaders });
       const usersToShow = res.ok ? await res.json() : [];
       
       const usersToVisit = usersToShow.filter(u => {
