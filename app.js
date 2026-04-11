@@ -61,7 +61,11 @@ const App = (() => {
       if (h < 17) return I18n.t('good_afternoon');
       return I18n.t('good_evening');
     }
-  
+    if (h < 12) return 'Good Morning,';
+    if (h < 17) return 'Good Afternoon,';
+    return 'Good Evening,';
+  }
+
   // ════════════════════════════════════════════════════════
   //  SCREEN NARRATOR
   // ════════════════════════════════════════════════════════
@@ -81,10 +85,6 @@ const App = (() => {
     if (key) {
       I18n.speak(I18n.t(key));
     }
-  }
-    if (h < 12) return 'Good Morning,';
-    if (h < 17) return 'Good Afternoon,';
-    return 'Good Evening,';
   }
 
   // ════════════════════════════════════════════════════════
