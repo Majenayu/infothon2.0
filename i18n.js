@@ -390,6 +390,15 @@ const I18n = (() => {
       location_sharing_active: 'Location sharing is now active',
       location_sharing_inactive: 'Location sharing paused',
 
+      // Page Narrator Descriptions
+      page_desc_home: "Your home dashboard showing today's pickup status, rewards points, and bin fill level.",
+      page_desc_map: "The community map showing live waste collection routes and nearby collection points.",
+      page_desc_history: "Your collection history and monthly environmental impact summary.",
+      page_desc_leaderboard: "The rewards store where you can redeem points for sustainable gifts.",
+      page_desc_profile: "Your account settings, personal details, and accessibility preferences.",
+      page_desc_chat: "EcoBot AI assistant – ask me anything about waste management and sustainability.",
+      read_page_desc: 'Read screen summary',
+
       // Map & Popups
       map_not_configured: 'Map Not Configured',
       house_label: 'House',
@@ -763,6 +772,15 @@ const I18n = (() => {
       nav_profile_speak: 'प्रोफाइल खोल रहे हैं',
       location_sharing_active: 'लोकेशन शेयरिंग अब सक्रिय है',
       location_sharing_inactive: 'लोकेशन शेयरिंग रुकी हुई है',
+
+      // Page Narrator Descriptions
+      page_desc_home: 'आपका होम डैशबोर्ड आज के पिकअप स्टेटस, रिवॉर्ड पॉइंट्स और बिन फिल लेवल को दिखाता है।',
+      page_desc_map: 'सामुदायिक मानचित्र लाइव कचरा संग्रह मार्गों और पास के संग्रह बिंदुओं को दिखाता है।',
+      page_desc_history: 'आपका संग्रह इतिहास और मासिक पर्यावरणीय प्रभाव सारांश।',
+      page_desc_leaderboard: 'रिवॉर्ड स्टोर जहाँ आप टिकाऊ उपहारों के लिए पॉइंट्स भुना सकते हैं।',
+      page_desc_profile: 'आपकी खाता सेटिंग, व्यक्तिगत विवरण और पहुंच प्राथमिकताएं।',
+      page_desc_chat: 'इकोबॉट एआई सहायक - कचरा प्रबंधन और स्थिरता के बारे में मुझसे कुछ भी पूछें।',
+      read_page_desc: 'पेज का विवरण सुनें',
 
       // Map & Popups
       map_not_configured: 'मानचित्र कॉन्फ़िगर नहीं किया गया',
@@ -1138,6 +1156,15 @@ const I18n = (() => {
       location_sharing_active: 'ಸ್ಥಳ ಹಂಚಿಕೆ ಈಗ ಸಕ್ರಿಯವಾಗಿದೆ',
       location_sharing_inactive: 'ಸ್ಥಳ ಹಂಚಿಕೆಯನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ',
 
+      // Page Narrator Descriptions
+      page_desc_home: 'ನಿಮ್ಮ ಹೋಮ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಇಂದಿನ ಪಿಕಪ್ ಸ್ಥಿತಿ, ಬಹುಮಾನದ ಅಂಕಗಳು ಮತ್ತು ಬಿನ್ ಭರ್ತಿ ಮಟ್ಟವನ್ನು ತೋರಿಸುತ್ತದೆ.',
+      page_desc_map: 'ಲೈವ್ ಕಸ ಸಂಗ್ರಹ ಮಾರ್ಗಗಳು ಮತ್ತು ಹತ್ತಿರದ ಸಂಗ್ರಹಣಾ ಕೇಂದ್ರಗಳನ್ನು ತೋರಿಸುವ ಸಮುದಾಯ ನಕ್ಷೆ.',
+      page_desc_history: 'ನಿಮ್ಮ ಸಂಗ್ರಹಣೆ ಇತಿಹಾಸ ಮತ್ತು ಮಾಸಿಕ ಪರಿಸರ ಪ್ರಭಾವದ ಸಾರಾಂಶ.',
+      page_desc_leaderboard: 'ನೀವು ಸಮರ್ಥನೀಯ ಉಡುಗೊರೆಗಳಿಗಾಗಿ ಅಂಕಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳುವ ರಿವಾರ್ಡ್ ಸ್ಟೋರ್.',
+      page_desc_profile: 'ನಿಮ್ಮ ಖಾತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ವೈಯಕ್ತಿಕ ವಿವರಗಳು ಮತ್ತು ಪ್ರವೇಶಿಸುವಿಕೆ ಆದ್ಯತೆಗಳು.',
+      page_desc_chat: 'ಇಕೋಬಾಟ್ ಎಐ ಸಹಾಯಕ - ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣೆ ಮತ್ತು ಸುಸ್ಥಿರತೆಯ ಬಗ್ಗೆ ನನ್ನನ್ನು ಏನು ಬೇಕಾದರೂ ಕೇಳಿ.',
+      read_page_desc: 'ಪುಟದ ವಿವರಣೆಯನ್ನು ಓದಿ',
+
       // Map & Popups
       map_not_configured: 'ನಕ್ಷೆ ಕಾನ್ಫಿಗರ್ ಆಗಿಲ್ಲ',
       house_label: 'ಮನೆ',
@@ -1248,25 +1275,33 @@ const I18n = (() => {
   function speak(text) {
     if (!speakEnabled || !('speechSynthesis' in window)) return;
 
-    console.log(`[TTS] Speaking: "${text}" [${currentLang}]`);
-
-    // Cancel existing speech
+    // Cancel existing speech immediately
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Attempt to pick a localized voice
-    const voices = window.speechSynthesis.getVoices();
+    // Refresh voices list - necessary for some browsers
+    let voices = window.speechSynthesis.getVoices();
+    
     const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN' };
     const targetLang = langMap[currentLang] || 'en-US';
 
-    // Find direct match or start-with match
-    let voice = voices.find(v => v.lang === targetLang) || 
-                voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
+    // Robust matching for localized voices
+    // We look for exact match, then language-only match, then "Google" high-quality variants
+    let bestVoice = voices.find(v => v.lang === targetLang && v.name.includes('Google')) ||
+                    voices.find(v => v.lang === targetLang) ||
+                    voices.find(v => v.lang.replace('_', '-').includes(targetLang)) ||
+                    voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
     
-    if (voice) utterance.voice = voice;
-    utterance.lang = targetLang;
-    utterance.rate = 1.0;
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+      console.log(`[TTS] Using Voice: ${bestVoice.name} (${bestVoice.lang}) for Text: "${text.substring(0,30)}..."`);
+    } else {
+      console.warn(`[TTS] No perfect voice match found for ${targetLang}. Using default.`);
+    }
+
+    utterance.lang  = targetLang;
+    utterance.rate  = 0.95; // Slightly slower for better clarity
     utterance.pitch = 1.0;
 
     window.speechSynthesis.speak(utterance);

@@ -61,6 +61,27 @@ const App = (() => {
       if (h < 17) return I18n.t('good_afternoon');
       return I18n.t('good_evening');
     }
+  
+  // ════════════════════════════════════════════════════════
+  //  SCREEN NARRATOR
+  // ════════════════════════════════════════════════════════
+  function readPageDescription() {
+    if (typeof I18n === 'undefined' || typeof I18n.speak !== 'function') return;
+
+    const descKeys = {
+      home: 'page_desc_home',
+      map: 'page_desc_map',
+      history: 'page_desc_history',
+      leaderboard: 'page_desc_leaderboard',
+      chat: 'page_desc_chat',
+      profile: 'page_desc_profile'
+    };
+
+    const key = descKeys[currentTab];
+    if (key) {
+      I18n.speak(I18n.t(key));
+    }
+  }
     if (h < 12) return 'Good Morning,';
     if (h < 17) return 'Good Afternoon,';
     return 'Good Evening,';
@@ -308,6 +329,12 @@ const App = (() => {
   // ════════════════════════════════════════════════════════
   function navigate(tab) {
     currentTab = tab;
+
+    // Silence ongoing speech when changing screens
+    if (typeof I18n !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+    }
+
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
@@ -1721,6 +1748,7 @@ const App = (() => {
   return {
     init, navigate, showToast,
     renderGauge, updateFill,
+    readPageDescription,
     switchLoginTab, showSigninView, showSignupView,
     selectSignupRole, fillDemo,
     loginUser, loginDriver, signUpUser, logout,
