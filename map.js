@@ -85,8 +85,12 @@ const MapModule = (() => {
     clearUserMarkers();
     
     try {
-      // 1. Fetch Unified Active Users (Real + DB Mocks)
-      const res = await fetch('/api/users/active');
+      // 1. Fetch Unified Active Users (Real + DB Mocks) securely with driver token
+      const headers = {};
+      if (window.ApiModule && ApiModule.getToken()) {
+        headers['Authorization'] = `Bearer ${ApiModule.getToken()}`;
+      }
+      const res = await fetch('/api/users/active', { headers });
       const usersToShow = res.ok ? await res.json() : MOCK_USERS; 
       
       usersToShow.forEach(user => {

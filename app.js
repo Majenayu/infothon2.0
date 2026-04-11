@@ -104,9 +104,9 @@ const App = (() => {
       document.getElementById('user-password').value = 'demo123';
       showToast('Point User demo filled', 'info');
     } else if (role === 'driver') {
-      document.getElementById('driver-empid').value = 'EMP-00421';
-      document.getElementById('driver-pin').value   = '4421';
-      showToast('Driver demo filled', 'info');
+      document.getElementById('driver-empid').value = 'D001';
+      document.getElementById('driver-pin').value   = '1234';
+      showToast('Gokulam North Driver demo filled', 'info');
     }
   }
 
