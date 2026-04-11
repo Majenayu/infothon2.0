@@ -15,6 +15,22 @@ const MapModule = (() => {
   let routeDrawnForObserver = false;
   let etaInterval = null;
   let trackingInterval = null;
+  let liveUserMarker = null;
+  let mapGeneratedForObserver = false;
+
+  function updateLiveUserMarker(lng, lat) {
+    if (!map) return;
+    if (!liveUserMarker) {
+      const el = document.createElement('div');
+      el.className = 'live-user-dot';
+      el.innerHTML = '<div class="pulse"></div>';
+      liveUserMarker = new mapboxgl.Marker({ element: el, pitchAlignment: 'map' })
+        .setLngLat([lng, lat])
+        .addTo(map);
+    } else {
+      liveUserMarker.setLngLat([lng, lat]);
+    }
+  }
 
   // SVG truck icon for the map
   const TRUCK_SVG = `
@@ -390,12 +406,17 @@ const MapModule = (() => {
         if (userLoc) {
           updateLiveStreetRoute(loc.location, userLoc);
           
+          // Show Live "You" Marker if coordinates are available
+          if (userLoc.lat && userLoc.lng) {
+            updateLiveUserMarker(userLoc.lng, userLoc.lat);
+          }
+
           // GENERATE VIEW: Auto-zoom once to show user and truck
           if (!mapGeneratedForObserver) {
              const bounds = new mapboxgl.LngLatBounds()
                 .extend([loc.location.lng, loc.location.lat])
                 .extend([userLoc.lng, userLoc.lat]);
-             map.fitBounds(bounds, { padding: 80, duration: 1500 });
+             map.fitBounds(bounds, { padding: 90, duration: 2000 });
              mapGeneratedForObserver = true;
           }
         }
@@ -684,6 +705,8 @@ const MapModule = (() => {
     const nearest = turf.nearestPoint(userPt, featuresCollection);
     const dest = nearest.geometry.coordinates;
 
+    updateLiveUserMarker(userLng, userLat);
+
     try {
       const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${userLng},${userLat};${dest[0]},${dest[1]}?geometries=geojson&overview=full&access_token=${ECOROUTE_CONFIG.MAPBOX_TOKEN}`;
       const res = await fetch(url);
@@ -745,6 +768,7 @@ const MapModule = (() => {
     recenter,
     addUserPins,
     updateDriverMarker,
+    updateLiveUserMarker,
     routeToNearestPoint,
     startTrackingPolling,
     stopTrackingPolling,

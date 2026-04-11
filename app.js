@@ -1464,6 +1464,9 @@ const App = (() => {
     navigator.geolocation.watchPosition(
       (pos) => {
         liveCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (window.MapModule && typeof MapModule.updateLiveUserMarker === 'function') {
+           MapModule.updateLiveUserMarker(liveCoords.lng, liveCoords.lat);
+        }
       },
       (err) => console.warn('Geolocation watch failed', err),
       { enableHighAccuracy: true, maximumAge: 10000 }
