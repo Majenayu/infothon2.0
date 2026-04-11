@@ -51,6 +51,11 @@ const App = (() => {
   // ════════════════════════════════════════════════════════
   function getGreeting() {
     const h = new Date().getHours();
+    if (typeof I18n !== 'undefined') {
+      if (h < 12) return I18n.t('good_morning');
+      if (h < 17) return I18n.t('good_afternoon');
+      return I18n.t('good_evening');
+    }
     if (h < 12) return 'Good Morning,';
     if (h < 17) return 'Good Afternoon,';
     return 'Good Evening,';
@@ -1581,6 +1586,11 @@ const App = (() => {
     toggleBottomSheet(false); // Start hidden for full map view
     startLiveTracking();
 
+    // Initialize i18n translations
+    if (typeof I18n !== 'undefined') {
+      I18n.init();
+    }
+
     // Bottom nav
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => navigate(item.dataset.tab));
@@ -1689,6 +1699,20 @@ const App = (() => {
     handleTripComplete,
     // Admin
     resetAllUserPreferences,
+    // ── Language change handler (called by I18n module) ──
+    onLanguageChange: function() {
+      // Re-apply greeting text
+      const greetEl = document.getElementById('greeting-text');
+      if (greetEl) greetEl.textContent = getGreeting();
+
+      // Close language dropdown
+      const dd = document.getElementById('lang-dropdown');
+      if (dd) dd.classList.remove('show');
+
+      // Re-render dynamic screens if visible
+      if (currentTab === 'leaderboard') renderLeaderboard();
+      if (currentTab === 'history') renderHistory();
+    },
     // Expose for MapModule to call (Feature 3)
     getUserLocation: () => liveCoords || user?.location,
     getCurrentUser:  () => user,

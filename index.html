@@ -41,7 +41,7 @@
     <div class="splash-glow"></div>
   </div>
   <div class="splash-brand"><span>Eco</span>Route</div>
-  <div class="splash-tagline">Smart Waste. Smarter Cities.</div>
+  <div class="splash-tagline" data-i18n="splash_tagline">Smart Waste. Smarter Cities.</div>
   <div class="splash-loader"></div>
 </div>
 
@@ -58,8 +58,8 @@
     <div class="pwa-popup-icon-img" style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#FF6B00,#CC5500);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🚛</div>
   </div>
   <div class="pwa-popup-body">
-    <div class="pwa-popup-title">Add to Home Screen</div>
-    <div class="pwa-popup-sub">Install EcoRoute for quick access</div>
+    <div class="pwa-popup-title" data-i18n="add_home_screen">Add to Home Screen</div>
+    <div class="pwa-popup-sub" data-i18n="install_ecoroute">Install EcoRoute for quick access</div>
   </div>
   <button id="pwa-popup-install-btn" class="pwa-popup-install-btn">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -87,30 +87,30 @@
 <div id="profile-edit-modal" class="modal">
   <div class="modal-handle"></div>
   <div class="modal-header">
-    <span class="modal-title">Edit Profile</span>
+    <span class="modal-title" data-i18n="edit_profile">Edit Profile</span>
     <button class="modal-close-btn" onclick="App.closeModal()">✕</button>
   </div>
   <div class="modal-body">
     <div class="input-group">
-      <label class="input-label">Full Name</label>
+      <label class="input-label" data-i18n="full_name">Full Name</label>
       <input id="edit-name" class="modal-input" type="text" placeholder="Your full name"/>
     </div>
     <div class="input-group">
-      <label class="input-label">Nickname</label>
+      <label class="input-label" data-i18n="nickname">Nickname</label>
       <input id="edit-nickname" class="modal-input" type="text" placeholder="How we greet you"/>
     </div>
     <div class="input-group">
-      <label class="input-label">Phone Number</label>
+      <label class="input-label" data-i18n="phone_number">Phone Number</label>
       <input id="edit-phone" class="modal-input" type="tel" placeholder="+91 XXXXX XXXXX"/>
     </div>
     <div class="input-group">
-      <label class="input-label">Address</label>
+      <label class="input-label" data-i18n="address">Address</label>
       <input id="edit-address" class="modal-input" type="text" placeholder="Your pickup address (or use pin below)"/>
     </div>
     <button class="btn btn-secondary btn-full" style="gap:8px;" onclick="App.openLocationPicker()">
       📍 Set Exact Location on Map
     </button>
-    <button class="btn btn-primary btn-full mt-3" onclick="App.saveProfile()">Save Changes</button>
+    <button class="btn btn-primary btn-full mt-3" onclick="App.saveProfile()" data-i18n="save_changes">Save Changes</button>
   </div>
 </div>
 
@@ -118,7 +118,7 @@
 <div id="notif-modal" class="modal">
   <div class="modal-handle"></div>
   <div class="modal-header">
-    <span class="modal-title">Notifications</span>
+    <span class="modal-title" data-i18n="notifications">Notifications</span>
     <button class="modal-close-btn" onclick="App.closeModal()">✕</button>
   </div>
   <div class="modal-body" id="notif-modal-list"></div>
@@ -136,7 +136,7 @@
         <polyline points="15 18 9 12 15 6"/>
       </svg>
     </button>
-    <span class="lp-title">Set Your Location</span>
+    <span class="lp-title" data-i18n="set_your_location">Set Your Location</span>
   </div>
 
   <!-- Map fills the screen -->
@@ -152,8 +152,8 @@
 
   <!-- Bottom address card -->
   <div class="lp-bottom">
-    <div class="lp-address-label">Delivery Location</div>
-    <div class="lp-address-value" id="lp-address-value">Move the map to set your location</div>
+    <div class="lp-address-label" data-i18n="delivery_location">Delivery Location</div>
+    <div class="lp-address-value" id="lp-address-value" data-i18n="move_map_location">Move the map to set your location</div>
     <div class="lp-coords" id="lp-coords"></div>
     <button class="btn btn-primary btn-full" onclick="App.confirmLocation()" style="margin-top:12px;">
       Confirm Location
@@ -176,14 +176,14 @@
       <div class="login-logo-img" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#FF6B00,#CC5500);display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 0 24px rgba(255,107,0,0.35);">🚛</div>
       <div class="login-brand"><span>Eco</span>Route</div>
     </div>
-    <div class="login-tagline">Your smart waste collection companion</div>
+    <div class="login-tagline" data-i18n="login_tagline">Your smart waste collection companion</div>
 
     <!-- Tabs: User Login / Driver Login -->
     <div class="login-tab-row">
-      <button class="login-tab active" id="login-tab-user" onclick="App.switchLoginTab('user')">
+      <button class="login-tab active" id="login-tab-user" onclick="App.switchLoginTab('user')" data-i18n="user_login">
         🏠 User Login
       </button>
-      <button class="login-tab" id="login-tab-driver" onclick="App.switchLoginTab('driver')">
+      <button class="login-tab" id="login-tab-driver" onclick="App.switchLoginTab('driver')" data-i18n="driver_login">
         🚛 Driver Login
       </button>
     </div>
@@ -193,10 +193,10 @@
 
       <!-- Sign In View -->
       <form id="signin-view" class="login-form" onsubmit="return false;">
-        <div class="login-form-hint">Home &amp; Point users — sign in with your account</div>
+        <div class="login-form-hint" data-i18n="signin_hint">Home &amp; Point users — sign in with your account</div>
 
         <div class="input-group">
-          <label class="input-label">Email Address</label>
+          <label class="input-label" data-i18n="email_label">Email Address</label>
           <div class="input-wrap">
             <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <input id="user-email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email"/>
@@ -204,7 +204,7 @@
         </div>
 
         <div class="input-group">
-          <label class="input-label">Password</label>
+          <label class="input-label" data-i18n="password_label">Password</label>
           <div class="input-wrap">
             <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <input id="user-password" class="form-input" type="password" placeholder="••••••••" autocomplete="current-password"/>
@@ -215,15 +215,15 @@
         </div>
 
         <div style="text-align:right;margin-top:-4px;">
-          <span class="login-link-sm">Forgot password?</span>
+          <span class="login-link-sm" data-i18n="forgot_password">Forgot password?</span>
         </div>
 
-        <button id="user-login-btn" class="btn btn-primary btn-full login-btn" onclick="App.loginUser()">Sign In</button>
+        <button id="user-login-btn" class="btn btn-primary btn-full login-btn" onclick="App.loginUser()" data-i18n="sign_in">Sign In</button>
 
-        <div class="login-divider"><span>Demo Accounts</span></div>
+        <div class="login-divider"><span data-i18n="demo_accounts">Demo Accounts</span></div>
         <div class="demo-accounts">
-          <div class="demo-chip" onclick="App.fillDemo('home')">🏠 Home User</div>
-          <div class="demo-chip" onclick="App.fillDemo('point')">🗑 Point User</div>
+          <div class="demo-chip" onclick="App.fillDemo('home')" data-i18n="home_user">🏠 Home User</div>
+          <div class="demo-chip" onclick="App.fillDemo('point')" data-i18n="point_user">🗑 Point User</div>
         </div>
 
         <div class="signup-toggle-row">
@@ -355,6 +355,28 @@
     <div><span>Eco</span>Route</div>
   </div>
   <div class="topbar-actions">
+    <!-- Language Selector -->
+    <div class="lang-selector" id="lang-selector">
+      <button class="icon-btn lang-btn" onclick="I18n.toggleLangDropdown()" title="Language">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span class="lang-badge" id="lang-current-label">EN</span>
+      </button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <div class="lang-option" onclick="I18n.setLanguage('en')" data-lang="en">
+          <span class="lang-flag">🇬🇧</span> English
+        </div>
+        <div class="lang-option" onclick="I18n.setLanguage('hi')" data-lang="hi">
+          <span class="lang-flag">🇮🇳</span> हिंदी
+        </div>
+        <div class="lang-option" onclick="I18n.setLanguage('kn')" data-lang="kn">
+          <span class="lang-flag">🏛️</span> ಕನ್ನಡ
+        </div>
+      </div>
+    </div>
     <div class="icon-btn" id="notif-bell-btn" onclick="App.openNotifModal()" title="Notifications">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -375,7 +397,7 @@
 
   <!-- Greeting -->
   <div class="greeting-section">
-    <div class="greeting-time" id="greeting-text">Good Morning,</div>
+    <div class="greeting-time" id="greeting-text" data-i18n="good_morning">Good Morning,</div>
     <div class="greeting-name font-display" id="greeting-name">Hello <span>✨</span></div>
   </div>
 
@@ -384,11 +406,11 @@
     <div class="status-banner-left">
       <div id="status-icon" class="status-icon">⏳</div>
       <div>
-        <div id="status-label" class="status-label">Confirm today's pickup</div>
-        <div id="status-sub" class="status-sub">Tap to let us know your bin is ready</div>
+        <div id="status-label" class="status-label" data-i18n="confirm_todays_pickup">Confirm today's pickup</div>
+        <div id="status-sub" class="status-sub" data-i18n="tap_to_confirm">Tap to let us know your bin is ready</div>
       </div>
     </div>
-    <button id="status-btn" class="status-confirm-btn" onclick="App.navigate('confirm')">Confirm</button>
+    <button id="status-btn" class="status-confirm-btn" onclick="App.navigate('confirm')" data-i18n="confirm">Confirm</button>
   </div>
 
   <!-- Role-specific home content — rendered by JS -->
@@ -399,23 +421,23 @@
     <div class="stat-card">
       <div class="stat-icon">⏰</div>
       <div class="stat-val" style="font-size:0.82rem;" id="stat-next-pickup">Today 10:30</div>
-      <div class="stat-lbl">Next Pickup</div>
+      <div class="stat-lbl" data-i18n="next_pickup">Next Pickup</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">📦</div>
       <div class="stat-val" id="stat-collections">0</div>
-      <div class="stat-lbl">Collections</div>
+      <div class="stat-lbl" data-i18n="collections">Collections</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">🏆</div>
       <div class="stat-val" id="stat-points">0</div>
-      <div class="stat-lbl">Points</div>
+      <div class="stat-lbl" data-i18n="points">Points</div>
     </div>
   </div>
 
   <!-- Fill Panel — shown for home/point users -->
   <div class="fill-panel mt-3" id="fill-panel">
-    <div class="fill-question">How full is your bin today?</div>
+    <div class="fill-question" data-i18n="how_full_bin">How full is your bin today?</div>
     <div id="home-gauge"></div>
     <div style="width:100%;">
       <input type="range" id="fill-slider" min="0" max="100" value="85"
@@ -444,7 +466,7 @@
       </div>
     </div>
 
-    <button id="submit-report-btn" class="btn btn-primary btn-full">SUBMIT REPORT</button>
+    <button id="submit-report-btn" class="btn btn-primary btn-full" data-i18n="submit_report">SUBMIT REPORT</button>
 
     <button id="find-nearest-bin-btn" class="btn btn-secondary btn-full mt-2" 
             onclick="MapModule.routeToNearestPoint()" style="gap:8px; border-color:rgba(255,107,0,0.4); color:var(--orange);">
@@ -459,12 +481,12 @@
   <!-- Driver Panel — shown for driver role -->
   <div id="driver-panel" style="display:none;padding:0 20px;margin-top:16px;">
     <div class="driver-header">
-      <div class="driver-mode-badge">🚛 Driver Mode</div>
-      <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;">Today's Route</div>
+      <div class="driver-mode-badge" data-i18n="driver_mode">🚛 Driver Mode</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;" data-i18n="todays_route">Today's Route</div>
 
       <div class="driver-controls" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px;">
-        <button id="driver-online-btn" class="btn btn-primary" style="background:#22C55E;border-color:#22C55E;" onclick="App.toggleDriverOnline()">📍 Go Online (Share Location)</button>
-        <button id="driver-block-btn" class="btn btn-secondary" style="border-color:#EF4444;color:#EF4444;" onclick="App.toggleDriverBlock()">🔒 Block User Pickup Requests</button>
+        <button id="driver-online-btn" class="btn btn-primary" style="background:#22C55E;border-color:#22C55E;" onclick="App.toggleDriverOnline()" data-i18n="go_online">📍 Go Online (Share Location)</button>
+        <button id="driver-block-btn" class="btn btn-secondary" style="border-color:#EF4444;color:#EF4444;" onclick="App.toggleDriverBlock()" data-i18n="block_pickups">🔒 Block User Pickup Requests</button>
         <button id="overload-btn" class="btn" style="display:none; background:rgba(239,68,68,0.1); border:1px solid #EF4444; color:#EF4444; font-weight:700; border-radius:12px; padding:14px; transition:all 0.2s;" onclick="OverloadModule.declare()">
           🚨 Declare Area Overload
         </button>
@@ -473,15 +495,15 @@
       <div class="driver-stats-row">
         <div class="driver-stat">
           <div class="driver-stat-val" id="driver-active-count">—</div>
-          <div class="driver-stat-lbl">Active Stops</div>
+          <div class="driver-stat-lbl" data-i18n="active_stops">Active Stops</div>
         </div>
         <div class="driver-stat">
           <div class="driver-stat-val">~2.4h</div>
-          <div class="driver-stat-lbl">Est. Time</div>
+          <div class="driver-stat-lbl" data-i18n="est_time">Est. Time</div>
         </div>
         <div class="driver-stat">
           <div class="driver-stat-val">18km</div>
-          <div class="driver-stat-lbl">Distance</div>
+          <div class="driver-stat-lbl" data-i18n="distance">Distance</div>
         </div>
       </div>
       <button class="btn btn-primary btn-full mt-3" onclick="App.navigate('map');">
@@ -580,11 +602,11 @@
 ══════════════════════════════════════════════════════ -->
 <section id="screen-history" class="screen">
   <div style="padding:20px 20px 0;">
-    <div class="font-display" style="font-size:1.2rem;font-weight:700;">Collection History</div>
+    <div class="font-display" style="font-size:1.2rem;font-weight:700;" data-i18n="collection_history">Collection History</div>
   </div>
   <div class="history-tabs">
-    <div class="history-tab active" data-filter="calendar">Calendar</div>
-    <div class="history-tab" data-filter="all">List View</div>
+    <div class="history-tab active" data-filter="calendar" data-i18n="calendar">Calendar</div>
+    <div class="history-tab" data-filter="all" data-i18n="list_view">List View</div>
   </div>
   
   <div id="view-calendar" class="mt-3" style="padding:0 20px;">
@@ -617,7 +639,7 @@
 ══════════════════════════════════════════════════════ -->
 <section id="screen-leaderboard" class="screen">
   <div style="padding:20px 20px 0;">
-    <div class="font-display" style="font-size:1.2rem;font-weight:700;">Rewards &amp; Leaderboard</div>
+    <div class="font-display" style="font-size:1.2rem;font-weight:700;" data-i18n="rewards_leaderboard">Rewards &amp; Leaderboard</div>
   </div>
   <div class="points-hero">
     <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -663,7 +685,7 @@
 ══════════════════════════════════════════════════════ -->
 <section id="screen-chat" class="screen" style="padding-bottom:0;">
   <div style="padding:20px 20px 12px;">
-    <div class="font-display" style="font-size:1.2rem;font-weight:700;">Waste Assistant</div>
+    <div class="font-display" style="font-size:1.2rem;font-weight:700;" data-i18n="waste_assistant">Waste Assistant</div>
     <div style="font-size:0.8rem;color:#A3A3A3;margin-top:2px;">AI-powered waste classification</div>
   </div>
   <div class="chat-placeholder">
@@ -697,34 +719,34 @@
   <div class="profile-hero">
     <div class="profile-avatar" id="profile-avatar">👤</div>
     <div class="profile-name" id="profile-name">—</div>
-    <div class="profile-role-tag" id="profile-role-tag">Home User</div>
+    <div class="profile-role-tag" id="profile-role-tag" data-i18n="home_user_label">Home User</div>
     <div class="profile-phone" id="profile-phone">—</div>
-    <button class="edit-btn" onclick="App.openProfileEdit()">Edit Profile</button>
+    <button class="edit-btn" onclick="App.openProfileEdit()" data-i18n="edit_profile">Edit Profile</button>
   </div>
   <div class="profile-stats-strip">
     <div class="profile-stat-item">
       <div class="profile-stat-val" id="profile-total-points">0</div>
-      <div class="profile-stat-lbl">Total Points</div>
+      <div class="profile-stat-lbl" data-i18n="total_points">Total Points</div>
     </div>
     <div class="profile-stat-divider"></div>
     <div class="profile-stat-item">
       <div class="profile-stat-val" id="profile-collections">0</div>
-      <div class="profile-stat-lbl">Collections</div>
+      <div class="profile-stat-lbl" data-i18n="collections">Collections</div>
     </div>
     <div class="profile-stat-divider"></div>
     <div class="profile-stat-item">
       <div class="profile-stat-val" id="profile-redeemed">0</div>
-      <div class="profile-stat-lbl">Redeemed</div>
+      <div class="profile-stat-lbl" data-i18n="redeemed">Redeemed</div>
     </div>
   </div>
   <div class="profile-section">
     <div style="padding:14px 16px;font-weight:600;font-size:0.9rem;border-bottom:1px solid var(--border);">Preferences</div>
     <div class="profile-row" style="cursor:default;">
-      <span class="profile-row-label">Pickup Notifications</span>
+      <span class="profile-row-label" data-i18n="pickup_notifications">Pickup Notifications</span>
       <label class="toggle"><input type="checkbox" id="notif-toggle" checked/><span class="toggle-slider"></span></label>
     </div>
     <div class="profile-row" style="cursor:default;">
-      <span class="profile-row-label">Pickup Schedule</span>
+      <span class="profile-row-label" data-i18n="pickup_schedule">Pickup Schedule</span>
       <span class="profile-row-value" style="color:#FF6B00;">Mon–Sat</span>
     </div>
   </div>
@@ -763,7 +785,7 @@
       <span class="profile-row-value">v2.1.0</span>
     </div>
     <div class="profile-row" onclick="App.logout()">
-      <span class="profile-row-label profile-logout">Logout</span>
+      <span class="profile-row-label profile-logout" data-i18n="logout">Logout</span>
     </div>
   </div>
   <div style="height:16px;"></div>
@@ -803,10 +825,10 @@
     </div>
   </div>
   <div class="confirm-bottom">
-    <div class="confirm-status-pill" id="confirm-status-pill">⏳ Pending Confirmation</div>
-    <button id="confirm-pickup-btn" class="btn btn-primary btn-full">✅ Yes, Bin is Ready</button>
-    <button id="confirm-notactive-btn" class="btn btn-secondary btn-full">❌ Not Available Today</button>
-    <button class="btn btn-secondary btn-full" onclick="App.navigate('home')" style="opacity:0.6;">Remind me later</button>
+    <div class="confirm-status-pill" id="confirm-status-pill" data-i18n="pending_confirmation">⏳ Pending Confirmation</div>
+    <button id="confirm-pickup-btn" class="btn btn-primary btn-full" data-i18n="yes_bin_ready">✅ Yes, Bin is Ready</button>
+    <button id="confirm-notactive-btn" class="btn btn-secondary btn-full" data-i18n="not_available_btn">❌ Not Available Today</button>
+    <button class="btn btn-secondary btn-full" onclick="App.navigate('home')" style="opacity:0.6;" data-i18n="remind_later">Remind me later</button>
   </div>
 </section>
 
@@ -816,38 +838,39 @@
 <nav class="bottom-nav" id="bottom-nav" style="display:none;">
   <div class="nav-item active" data-tab="home">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Home
+    <span data-i18n="nav_home">Home</span>
   </div>
   <div class="nav-item" data-tab="map">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-    Map
+    <span data-i18n="nav_map">Map</span>
   </div>
   <div class="nav-item" data-tab="history">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    History
+    <span data-i18n="nav_history">History</span>
   </div>
   <div class="nav-item" data-tab="leaderboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
-    Rewards
+    <span data-i18n="nav_rewards">Rewards</span>
   </div>
   <div class="nav-item" data-tab="chat">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    Chat
+    <span data-i18n="nav_chat">Chat</span>
   </div>
   <div class="nav-item" data-tab="profile">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    Profile
+    <span data-i18n="nav_profile">Profile</span>
   </div>
 </nav>
 
 <!-- ══════════════════════════════════════════════════════
      SCRIPTS (order matters)
 ══════════════════════════════════════════════════════ -->
-<script src="/config.js?v=2"></script>
-<script src="/api.js?v=2"></script>
-<script src="/data.js?v=2"></script>
-<script src="/map.js?v=2"></script>
-<script src="/app.js?v=2"></script>
+<script src="/config.js?v=3"></script>
+<script src="/i18n.js?v=3"></script>
+<script src="/api.js?v=3"></script>
+<script src="/data.js?v=3"></script>
+<script src="/map.js?v=3"></script>
+<script src="/app.js?v=3"></script>
 
 <script>
   if ('serviceWorker' in navigator) {
