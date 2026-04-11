@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['home', 'point', 'driver'], default: 'home' },
   phone: { type: String, default: '' },
   address: { type: String, default: '' },
+  area: { type: String, default: 'unassigned' }, // User's assigned geographic zone
   location: {
     lat: { type: Number, default: 12.3375 },
     lng: { type: Number, default: 76.6394 }
@@ -63,10 +64,21 @@ const userSchema = new mongoose.Schema({
   // Driver-specific
   empId: { type: String, sparse: true },
   pin: { type: String },   // store hashed in production
-  isOnline: { type: Boolean, default: false }
+  isOnline: { type: Boolean, default: false },
+  assignedAreas: { type: [String], default: [] }, // Array of zones this driver manages
+  isReserve: { type: Boolean, default: false }    // If true, this is the master fallback driver
 }, { timestamps: true });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+const overloadRequestSchema = new mongoose.Schema({
+  area: { type: String, required: true },
+  requestedBy: { type: String, required: true }, // driver userId
+  status: { type: String, enum: ['pending', 'accepted', 'assigned_to_reserve'], default: 'pending' },
+  acceptedBy: { type: String, default: null }, // driver userId who picked it up
+  expiresAt: { type: Date, required: true }
+}, { timestamps: true });
+const OverloadRequest = mongoose.models.OverloadRequest || mongoose.model('OverloadRequest', overloadRequestSchema);
 
 const tripSchema = new mongoose.Schema({
   driverId: { type: String },
@@ -123,6 +135,7 @@ const mockUserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   role: { type: String, enum: ['home', 'point'], default: 'home' },
   address: { type: String, default: '' },
+  area: { type: String, default: 'unassigned' },
   lng: { type: Number, required: true },
   lat: { type: Number, required: true },
   fillLevel: { type: Number, default: 50 },
@@ -133,23 +146,45 @@ const MockUser = mongoose.models.MockUser || mongoose.model('MockUser', mockUser
 
 // Seeding logic for Mock Users and History
 async function seedMocks() {
-  const count = await MockUser.countDocuments();
-  if (count === 0) {
-    console.log('🌱 Seeding initial mock users...');
-    const initialMocks = [
-      { id: 'U001', name: 'Rahul Sharma', role: 'home', address: 'Vijayanagar 1st Stage, Mysuru', lng: 76.6082, lat: 12.3258, fillLevel: 85, lastReported: '2 hrs ago', points: 1250 },
-      { id: 'U002', name: 'Priya Nair', role: 'home', address: 'Kuvempunagar, Mysuru', lng: 76.6231, lat: 12.3441, fillLevel: 45, lastReported: '5 hrs ago', points: 870 },
-      { id: 'U003', name: 'Community Bin — Saraswathipuram', role: 'point', address: 'Saraswathipuram Main Road', lng: 76.6358, lat: 12.3312, fillLevel: 92, lastReported: '1 hr ago', points: 2100 },
-      { id: 'U004', name: 'Deepak Hegde', role: 'home', address: 'Jayalakshmipuram, Mysuru', lng: 76.6501, lat: 12.3189, fillLevel: 78, lastReported: '3 hrs ago', points: 540 },
-      { id: 'U005', name: 'Community Bin — Gokulam', role: 'point', address: 'Gokulam 3rd Stage', lng: 76.6143, lat: 12.3502, fillLevel: 33, lastReported: '8 hrs ago', points: 1680 },
-      { id: 'U006', name: 'Anitha Reddy', role: 'home', address: 'Rajivnagar, Mysuru', lng: 76.6620, lat: 12.3390, fillLevel: 73, lastReported: '2 hrs ago', points: 990 },
-      { id: 'U007', name: 'Community Bin — Nazarbad', role: 'point', address: 'Nazarbad Mohalla', lng: 76.6432, lat: 12.3088, fillLevel: 88, lastReported: '30 mins ago', points: 3200 },
-      { id: 'U008', name: 'Suresh Kumar', role: 'home', address: 'Hebbal 2nd Stage, Mysuru', lng: 76.6195, lat: 12.2980, fillLevel: 55, lastReported: '6 hrs ago', points: 430 },
-      { id: 'U009', name: 'Meera Iyengar', role: 'home', address: 'Lashkar Mohalla, Mysuru', lng: 76.6553, lat: 12.3055, fillLevel: 95, lastReported: '45 mins ago', points: 1870 },
-      { id: 'U010', name: 'Community Bin — Devaraja', role: 'point', address: 'Devaraja Urs Road', lng: 76.6388, lat: 12.2940, fillLevel: 62, lastReported: '4 hrs ago', points: 760 }
-    ];
-    await MockUser.insertMany(initialMocks);
+  await MockUser.deleteMany({}); // Wipe clean to enforce new areas
+  
+  console.log('🌱 Seeding Gokulam geometric mock users...');
+  const initialMocks = [
+    { id: 'U001', name: 'Rahul Sharma', role: 'home', address: 'Vijayanagar 1st Stage, Mysuru', area: 'gokulam_north', lng: 76.6082, lat: 12.3258, fillLevel: 85, lastReported: '2 hrs ago', points: 1250 },
+    { id: 'U002', name: 'Priya Nair', role: 'home', address: 'Kuvempunagar, Mysuru', area: 'gokulam_south', lng: 76.6231, lat: 12.3441, fillLevel: 45, lastReported: '5 hrs ago', points: 870 },
+    { id: 'U003', name: 'Bin — Saraswathipuram', role: 'point', address: 'Saraswathipuram Main Road', area: 'gokulam_east', lng: 76.6358, lat: 12.3312, fillLevel: 92, lastReported: '1 hr ago', points: 2100 },
+    { id: 'U004', name: 'Deepak Hegde', role: 'home', address: 'Jayalakshmipuram, Mysuru', area: 'gokulam_west', lng: 76.6501, lat: 12.3189, fillLevel: 78, lastReported: '3 hrs ago', points: 540 },
+    { id: 'U005', name: 'Bin — Gokulam', role: 'point', address: 'Gokulam 3rd Stage', area: 'gokulam_north', lng: 76.6143, lat: 12.3502, fillLevel: 33, lastReported: '8 hrs ago', points: 1680 },
+    { id: 'U006', name: 'Anitha Reddy', role: 'home', address: 'Rajivnagar, Mysuru', area: 'jayalakshmipuram', lng: 76.6620, lat: 12.3390, fillLevel: 73, lastReported: '2 hrs ago', points: 990 },
+    { id: 'U007', name: 'Bin — Nazarbad', role: 'point', address: 'Nazarbad Mohalla', area: 'gokulam_south', lng: 76.6432, lat: 12.3088, fillLevel: 88, lastReported: '30 mins ago', points: 3200 },
+    { id: 'U008', name: 'Suresh Kumar', role: 'home', address: 'Hebbal 2nd Stage, Mysuru', area: 'gokulam_east', lng: 76.6195, lat: 12.2980, fillLevel: 55, lastReported: '6 hrs ago', points: 430 },
+    { id: 'U009', name: 'Meera Iyengar', role: 'home', address: 'Lashkar Mohalla, Mysuru', area: 'jayalakshmipuram', lng: 76.6553, lat: 12.3055, fillLevel: 95, lastReported: '45 mins ago', points: 1870 },
+    { id: 'U010', name: 'Bin — Devaraja', role: 'point', address: 'Devaraja Urs Road', area: 'gokulam_west', lng: 76.6388, lat: 12.2940, fillLevel: 62, lastReported: '4 hrs ago', points: 760 }
+  ];
+  await MockUser.insertMany(initialMocks);
+  
+  // Seed the 6 Mock Drivers
+  console.log('🌱 Truncating and seeding 6 specialized zone drivers...');
+  const salt = await bcrypt.genSalt(10);
+  const fakeHash = await bcrypt.hash('password123', salt);
+  
+  const drivers = [
+    { empId: 'D001', pin: '1234', name: 'Driver Gokulam North', role: 'driver', assignedAreas: ['gokulam_north'] },
+    { empId: 'D002', pin: '1234', name: 'Driver Gokulam South', role: 'driver', assignedAreas: ['gokulam_south'] },
+    { empId: 'D003', pin: '1234', name: 'Driver Gokulam East', role: 'driver', assignedAreas: ['gokulam_east'] },
+    { empId: 'D004', pin: '1234', name: 'Driver Gokulam West', role: 'driver', assignedAreas: ['gokulam_west'] },
+    { empId: 'D005', pin: '1234', name: 'Driver Jayalakshmipuram', role: 'driver', assignedAreas: ['jayalakshmipuram'] },
+    { empId: 'D006', pin: '1234', name: 'RESERVE Emergency Driver', role: 'driver', assignedAreas: [], isReserve: true }
+  ];
+  
+  for (const d of drivers) {
+    await User.findOneAndUpdate(
+      { empId: d.empId },
+      { $set: { ...d, passwordHash: fakeHash } },
+      { upsert: true, new: true }
+    );
   }
+
 
   // Seed User Collection History (Real users & Mocks)
   const logCount = await CollectionLog.countDocuments();
@@ -400,12 +435,31 @@ app.patch('/api/bins/:id/fill', requireAuth, requireDb, async (req, res) => {
 // GET /api/users/active
 app.get('/api/users/active', requireDb, async (req, res) => {
   try {
-    // 1. Fetch real users
-    const realUsers = await User.find({ role: { $in: ['home', 'point'] } });
+    // 1. Determine driver's bounded areas
+    let assignedAreas = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        if (decoded.role === 'driver') {
+          const d = await User.findById(decoded.id);
+          if (d && d.assignedAreas && d.assignedAreas.length > 0) {
+            assignedAreas = d.assignedAreas;
+          }
+        }
+      } catch (e) { /* unauthenticated or fake demo token */ }
+    }
+
+    // 2. Fetch real users filtered by area
+    let query = { role: { $in: ['home', 'point'] } };
+    if (assignedAreas) query.area = { $in: assignedAreas };
+    const realUsers = await User.find(query);
     const mappedReal = realUsers.map(user => ({
       id: user._id,
       name: user.name,
       role: user.role,
+      area: user.area,
       address: user.address,
       lat: user.location?.lat,
       lng: user.location?.lng,
@@ -414,21 +468,24 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       isMock: false
     }));
 
-    // 2. Fetch mock users (Demo data)
-    const mocks = await MockUser.find();
+    // 3. Fetch mock users filtered by area
+    let mockQuery = {};
+    if (assignedAreas) mockQuery.area = { $in: assignedAreas };
+    const mocks = await MockUser.find(mockQuery);
     const mappedMocks = mocks.map(m => ({
       id: m.id,
       name: m.name,
       role: m.role,
+      area: m.area,
       address: m.address,
       lat: m.lat,
       lng: m.lng,
       fillLevel: m.fillLevel,
-      isActiveToday: null, // Mocks don't have daily opt-in logic typically
+      isActiveToday: null,
       isMock: true
     }));
 
-    // Merge and deduplicate by name (if a mock has same name as real, keep real)
+    // Merge and deduplicate by name
     const combined = [...mappedReal];
     mappedMocks.forEach(m => {
       if (!combined.some(u => u.name === m.name)) combined.push(m);
@@ -557,15 +614,105 @@ app.post('/api/driver/online', requireAuth, requireDb, async (req, res) => {
   }
 });
 
-// GET /api/driver/location (For home users to track)
-app.get('/api/driver/location', requireDb, async (req, res) => {
+// GET /api/driver/location (Home users find specific driver covering their zone)
+app.get('/api/driver/location', requireAuth, requireDb, async (req, res) => {
   try {
-    const driver = await User.findOne({ role: 'driver', isOnline: true });
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    const driver = await User.findOne({ 
+      role: 'driver', 
+      isOnline: true,
+      assignedAreas: user.area 
+    });
+    
     if (!driver) return res.json({ available: false });
-    res.json({ available: true, location: driver.location });
+    res.json({ available: true, location: driver.location, driverName: driver.name });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+// ════════════════════════════════════════════════════════════
+//  OVERLOAD & COLLABORATION
+// ════════════════════════════════════════════════════════════
+app.post('/api/driver/overload', requireAuth, requireDb, async (req, res) => {
+  try {
+    const driver = await User.findById(req.user.id);
+    if (!driver || driver.role !== 'driver') return res.status(403).json({ message: 'Drivers only' });
+    if (!driver.assignedAreas || driver.assignedAreas.length === 0) return res.status(400).json({ message: 'No areas assigned' });
+
+    // Mark the first area as overloaded
+    const areaToOverload = driver.assignedAreas[0];
+    
+    // Check if one already exists
+    let reqDoc = await OverloadRequest.findOne({ area: areaToOverload, status: 'pending' });
+    if (!reqDoc) {
+      reqDoc = await OverloadRequest.create({
+        area: areaToOverload,
+        requestedBy: driver.id,
+        expiresAt: new Date(Date.now() + 15000) // 15 seconds to allow UI polling buffering
+      });
+    }
+    res.status(201).json({ message: 'Overload SOS broadcasted', requestId: reqDoc.id, area: areaToOverload });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.get('/api/driver/overload-requests', requireAuth, requireDb, async (req, res) => {
+  try {
+    // 1. Force expiration logic check on every poll request
+    const expiredReqs = await OverloadRequest.find({ status: 'pending', expiresAt: { $lt: new Date() } });
+    for (const r of expiredReqs) {
+      r.status = 'assigned_to_reserve';
+      await r.save();
+      // Auto-assign to Reserve Driver
+      const reserve = await User.findOne({ isReserve: true });
+      if (reserve && !reserve.assignedAreas.includes(r.area)) {
+        reserve.assignedAreas.push(r.area);
+        await reserve.save();
+        
+        // Remove from the overwhelmed driver
+        const originalDriver = await User.findById(r.requestedBy);
+        if (originalDriver) {
+          originalDriver.assignedAreas = originalDriver.assignedAreas.filter(a => a !== r.area);
+          await originalDriver.save();
+        }
+        console.log(`⏱️ SOS Expired! Area ${r.area} auto-assigned to Reserve Driver ${reserve.name}`);
+      }
+    }
+
+    // 2. Fetch pending requests NOT created by this driver
+    const activeReqs = await OverloadRequest.find({ status: 'pending', requestedBy: { $ne: req.user.id } });
+    res.json(activeReqs);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.post('/api/driver/accept-overload', requireAuth, requireDb, async (req, res) => {
+  try {
+    const { requestId } = req.body;
+    const requestDoc = await OverloadRequest.findById(requestId);
+    if (!requestDoc || requestDoc.status !== 'pending') return res.status(400).json({ message: 'Request has already expired or been picked up' });
+
+    requestDoc.status = 'accepted';
+    requestDoc.acceptedBy = req.user.id;
+    await requestDoc.save();
+
+    // 1. Give area to the hero driver
+    const heroDriver = await User.findById(req.user.id);
+    if (heroDriver && !heroDriver.assignedAreas.includes(requestDoc.area)) {
+      heroDriver.assignedAreas.push(requestDoc.area);
+      await heroDriver.save();
+    }
+
+    // 2. Relieve the overwhelmed driver
+    const originalDriver = await User.findById(requestDoc.requestedBy);
+    if (originalDriver) {
+      originalDriver.assignedAreas = originalDriver.assignedAreas.filter(a => a !== requestDoc.area);
+      await originalDriver.save();
+    }
+    
+    res.json({ message: 'Hero accepted! Route bounds updated to include new zone.', area: requestDoc.area });
+  } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 // ════════════════════════════════════════════════════════════

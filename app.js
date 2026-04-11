@@ -1566,4 +1566,72 @@ const App = (() => {
   };
 })();
 
+// ════════════════════════════════════════════════════════════
+//  OVERLOAD & COLLABORATION MODULE
+// ════════════════════════════════════════════════════════════
+const OverloadModule = (function() {
+  async function declare() {
+    try {
+      if (!window.ApiModule) return;
+      const res = await ApiModule.reportOverload();
+      if (res && res.requestId) {
+        App.showToast(`🚨 Overload Declared for ${res.area}! Nearby drivers notified.`, 'info');
+        const btn = document.getElementById('overload-btn');
+        if (btn) {
+          btn.style.opacity = '0.5';
+          btn.textContent = '⏱️ SOS Active...';
+          btn.onclick = null;
+        }
+      }
+    } catch(err) { App.showToast(err.message, 'error'); }
+  }
+
+  async function pollRequests() {
+    if (App.getCurrentRole() !== 'driver' || !window.ApiModule) return;
+    try {
+      const reqs = await ApiModule.getOverloadRequests();
+      const banner = document.getElementById('sos-banner');
+      const areaSpan = document.getElementById('sos-area');
+      
+      if (reqs && reqs.length > 0) {
+        const activeReq = reqs[0];
+        if (banner) {
+           banner.style.display = 'block';
+           banner.dataset.reqId = activeReq._id;
+           if (areaSpan) areaSpan.textContent = activeReq.area.replace('_', ' ').toUpperCase();
+        }
+      } else {
+        if (banner) banner.style.display = 'none';
+      }
+    } catch(err) {}
+  }
+
+  async function accept() {
+    const banner = document.getElementById('sos-banner');
+    if (!banner || !banner.dataset.reqId) return;
+    try {
+      const r = await ApiModule.acceptOverload(banner.dataset.reqId);
+      if (r && r.area) {
+        App.showToast(`Hero! You have taken over ${r.area.replace('_', ' ').toUpperCase()}! 🦸`, 'success');
+        banner.style.display = 'none';
+        // Force a map user reload so the new zone's bins populate instantly
+        if (window.MapModule && typeof MapModule.loadUsersAndRefresh === 'function') {
+           await MapModule.loadUsersAndRefresh();
+        } else {
+           // Fallback to manual refresh
+           setTimeout(() => window.location.reload(), 1500);
+        }
+      }
+    } catch(err) {
+      App.showToast(err.message || 'Error accepting route. Maybe someone else got it!', 'error');
+      banner.style.display = 'none';
+    }
+  }
+
+  // Poll aggressively every 3 seconds for the 15-second SOS loop
+  setInterval(pollRequests, 3000);
+
+  return { declare, accept };
+})();
+
 document.addEventListener('DOMContentLoaded', App.init);

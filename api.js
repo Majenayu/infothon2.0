@@ -174,6 +174,18 @@ const ApiModule = (() => {
       return fallback;
     }
   }
+
+  // ── Overload & Collaboration ────────────────────────────────
+  async function reportOverload() {
+    return await request('POST', '/api/driver/overload');
+  }
+  async function getOverloadRequests() {
+    return await request('GET', '/api/driver/overload-requests');
+  }
+  async function acceptOverload(requestId) {
+    return await request('POST', '/api/driver/accept-overload', { requestId });
+  }
+
   async function submitDriverReport(type, description, location) {
     return await request('POST', '/api/driver/report', { type, description, location });
   }
@@ -221,6 +233,7 @@ const ApiModule = (() => {
     getAdminMocks, createAdminMock, updateAdminMock, deleteAdminMock,
     resetAllUserPreferences,
     verifyBin, triggerNotification, getDailySummary, getDriverHistory, submitDriverReport,
-    getActiveTrip, completeTrip
+    getActiveTrip, completeTrip,
+    reportOverload, getOverloadRequests, acceptOverload
   };
 })();
