@@ -324,7 +324,8 @@ app.post('/api/auth/register', requireDb, async (req, res) => {
       nickname: name.split(' ')[0],
       email: email.toLowerCase(),
       passwordHash,
-      role: role || 'home'
+      role: role || 'home',
+      area: 'gokulam_north' // Hardcoded for demo/hackathon to show up on map
     });
 
     const token = signToken(user._id);

@@ -348,6 +348,7 @@ const App = (() => {
     const driverPane = document.getElementById('driver-panel');
     const mapLabel   = document.getElementById('map-mode-label');
     const routeBtn   = document.getElementById('route-start-btn');
+    const overloadBtn = document.getElementById('overload-btn');
 
     // UI elements to hide for driver
     const statusBanner = document.getElementById('status-banner');
@@ -373,6 +374,7 @@ const App = (() => {
       if (fillPanel)  fillPanel.style.display  = 'none';
       if (driverPane) driverPane.style.display = 'block';
       if (routeBtn)   routeBtn.style.display   = 'flex';
+      if (overloadBtn) overloadBtn.style.display = 'block';
       if (mapLabel)   mapLabel.textContent      = 'Driver View';
       
       const el = document.getElementById('driver-active-count');
@@ -391,6 +393,7 @@ const App = (() => {
       if (driverPane) driverPane.style.display = 'none';
       if (fillPanel)  fillPanel.style.display  = 'flex';
       if (routeBtn)   routeBtn.style.display   = 'none';
+      if (overloadBtn) overloadBtn.style.display = 'none';
       if (mapLabel)   mapLabel.textContent      = 'Community Map';
 
       let messageSub = '3 community points within 500m of you';

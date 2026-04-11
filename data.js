@@ -119,6 +119,7 @@ const MOCK_NOTIFICATIONS = [
 const CURRENT_USER = {
   id: 'U001', name: 'Ayush Rai', nickname: 'Ayush', role: 'home',
   address: 'Gokulam 3rd Stage, Mysuru, Karnataka',
+  area: 'gokulam_north',
   location: { lat: 12.3502, lng: 76.6143 },
   lng: 76.6143, lat: 12.3502,
   fillLevel: 85, points: 1250,
