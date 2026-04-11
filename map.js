@@ -689,8 +689,8 @@ const MapModule = (() => {
   async function routeToNearestPoint(forcedLng, forcedLat) {
     if (!map) return;
 
-    let userLng = forcedLng;
-    let userLat = forcedLat;
+    let userLng = Number(forcedLng);
+    let userLat = Number(forcedLat);
 
     if (!userLng || !userLat) {
         const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
@@ -698,8 +698,8 @@ const MapModule = (() => {
           App.showToast(I18n.t('location_error'), 'error');
           return;
         }
-        userLng = userLoc.lng;
-        userLat = userLoc.lat;
+        userLng = Number(userLoc.lng);
+        userLat = Number(userLoc.lat);
     }
 
     const points = MOCK_USERS.filter(u => u.role === 'point');
@@ -707,11 +707,15 @@ const MapModule = (() => {
 
     // Use turf to find nearest
     const userPt = turf.point([userLng, userLat]);
-    const pointFeatures = points.map(p => turf.point([p.lng, p.lat], { ...p }));
+    const pointFeatures = points.map(p => turf.point([Number(p.lng), Number(p.lat)], { ...p }));
     const featuresCollection = turf.featureCollection(pointFeatures);
     
     // Nearest point
     const nearest = turf.nearestPoint(userPt, featuresCollection);
+    if (!nearest || !nearest.geometry) {
+      console.warn('[MapModule] No nearest point found');
+      return;
+    }
     const dest = nearest.geometry.coordinates;
 
     updateLiveUserMarker(userLng, userLat);
@@ -719,8 +723,13 @@ const MapModule = (() => {
     try {
       const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${userLng},${userLat};${dest[0]},${dest[1]}?geometries=geojson&overview=full&access_token=${ECOROUTE_CONFIG.MAPBOX_TOKEN}`;
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`Mapbox API error: ${res.status}`);
+      
       const data = await res.json();
-      if (!data.routes || !data.routes.length) return;
+      if (!data.routes || !data.routes.length) {
+        App.showToast(I18n.t('route_fetch_failed'), 'error');
+        return;
+      }
 
       drawRoute(data.routes[0].geometry);
       
@@ -732,14 +741,15 @@ const MapModule = (() => {
       map.fitBounds(bounds, { padding: 80, duration: 1000 });
       
       const msg = I18n.t('walking_route_gen', { 
-        name: nearest.properties.name,
-        dist: distance,
-        time: minutes
+        name: nearest.properties.name || 'Point',
+        dist: distance || 0,
+        time: minutes || 0
       });
       App.showToast(msg, 'success');
       
     } catch(e) {
-      console.warn('Failed to route to point', e);
+      console.error('[MapModule] Routing Error:', e);
+      App.showToast(I18n.t('route_fetch_failed'), 'error');
     }
   }
 
