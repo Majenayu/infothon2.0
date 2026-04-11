@@ -581,6 +581,19 @@ app.post('/api/driver/unblock', requireAuth, requireDb, async (req, res) => {
   }
 });
 
+// GET /api/driver/location — Fetch an active driver's location for users
+app.get('/api/driver/location', requireDb, async (req, res) => {
+  try {
+    const driver = await User.findOne({ role: 'driver', isOnline: true }).select('location isOnline name');
+    if (!driver || !driver.location) {
+      return res.json({ available: false });
+    }
+    res.json({ available: true, location: driver.location, name: driver.name });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // POST /api/driver/online
 app.post('/api/driver/online', requireAuth, requireDb, async (req, res) => {
   try {
@@ -600,36 +613,20 @@ app.post('/api/driver/online', requireAuth, requireDb, async (req, res) => {
   }
 });
 
-// GET /api/driver/location — Fetch active driver location from DB (for observers)
-app.get('/api/driver/location', requireDb, async (req, res) => {
+// GET /api/driver/location (Home users find specific driver covering their zone)
+app.get('/api/driver/location', requireAuth, requireDb, async (req, res) => {
   try {
-    // Find first available online driver
-    const driver = await User.findOne({ role: 'driver', isOnline: true }).select('location name');
-    if (!driver || !driver.location) {
-      return res.json({ available: false });
-    }
-    res.json({ 
-      available: true, 
-      location: driver.location,
-      name: driver.name 
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    const driver = await User.findOne({ 
+      role: 'driver', 
+      isOnline: true,
+      assignedAreas: user.area 
     });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET /api/driver/location — Fetch active driver location from DB (Universal lookup)
-app.get('/api/driver/location', requireDb, async (req, res) => {
-  try {
-    const driver = await User.findOne({ role: 'driver', isOnline: true }).select('location name');
-    if (!driver || !driver.location) {
-      return res.json({ available: false });
-    }
-    res.json({ 
-      available: true, 
-      location: driver.location,
-      driverName: driver.name 
-    });
+    
+    if (!driver) return res.json({ available: false });
+    res.json({ available: true, location: driver.location, driverName: driver.name });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

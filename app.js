@@ -1551,45 +1551,6 @@ const App = (() => {
   // ════════════════════════════════════════════════════════
   //  SPLASH
   // ════════════════════════════════════════════════════════
-  let driverSyncTimer = null;
-  async function toggleDriverOnline() {
-    const isCurrentlyOnline = document.getElementById('online-toggle-status')?.textContent === 'ONLINE';
-    const newStatus = !isCurrentlyOnline;
-    
-    try {
-      const res = await ApiModule.updateDriverOnline(newStatus, liveCoords);
-      if (res) {
-        // Update UI
-        const btn = document.getElementById('online-toggle-btn');
-        const status = document.getElementById('online-toggle-status');
-        if (newStatus) {
-           btn.innerHTML = 'STOP WORK (OFFLINE)';
-           btn.classList.add('offline');
-           status.textContent = 'ONLINE';
-           status.style.color = 'var(--green)';
-           
-           // Start silent sync heartbeat
-           if (driverSyncTimer) clearInterval(driverSyncTimer);
-           driverSyncTimer = setInterval(() => {
-             if (liveCoords) ApiModule.updateDriverOnline(true, liveCoords).catch(() => {});
-           }, 10000); 
-        } else {
-           btn.innerHTML = 'START WORK (ONLINE)';
-           btn.classList.remove('offline');
-           status.textContent = 'OFFLINE';
-           status.style.color = 'var(--red)';
-           if (driverSyncTimer) clearInterval(driverSyncTimer);
-           driverSyncTimer = null;
-           
-           // Immediately hide truck on own map if desired
-           if (window.MapModule && typeof MapModule.stopTrackingPolling === 'function') {
-             MapModule.stopTrackingPolling();
-           }
-        }
-      }
-    } catch (e) { showToast(e.message, 'error'); }
-  }
-
   function hideSplash() {
     setTimeout(() => {
       const s = document.getElementById('splash');
@@ -1599,6 +1560,35 @@ const App = (() => {
         setTimeout(() => s.remove(), 450);
       }
     }, 1600);
+  }
+
+  let driverSyncInterval = null;
+  async function toggleDriverOnline(isOnline) {
+    try {
+      if (isOnline) {
+        // Feature 6: Ensure coordinates are captured before sync
+        const loc = liveCoords || user?.location;
+        await ApiModule.updateDriverOnline(true, loc);
+        
+        // Start background sync every 10s
+        if (driverSyncInterval) clearInterval(driverSyncInterval);
+        driverSyncInterval = setInterval(() => {
+          if (liveCoords) {
+            ApiModule.updateDriverOnline(true, liveCoords).catch(e => console.warn('Sync failed', e));
+          }
+        }, 10000);
+
+        showToast('You are now ONLINE!', 'success');
+      } else {
+        // Clear sync
+        if (driverSyncInterval) {
+          clearInterval(driverSyncInterval);
+          driverSyncInterval = null;
+        }
+        await ApiModule.updateDriverOnline(false);
+        showToast('You are now OFFLINE', 'info');
+      }
+    } catch (e) { showToast(e.message, 'error'); }
   }
 
   // ════════════════════════════════════════════════════════
