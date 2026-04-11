@@ -437,6 +437,7 @@ app.patch('/api/bins/:id/fill', requireAuth, requireDb, async (req, res) => {
 
 // GET /api/users/active
 app.get('/api/users/active', requireDb, async (req, res) => {
+  try {
     // 1. Fetch real users (Universal filter for drivers in demo)
     let query = { role: { $in: ['home', 'point'] } };
     const realUsers = await User.find(query);
