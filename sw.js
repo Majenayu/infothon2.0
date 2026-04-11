@@ -3,7 +3,7 @@
 //  Handles caching for offline access and background notifications
 // ============================================================
 
-const CACHE_NAME = 'ecoroute-v1';
+const CACHE_NAME = 'ecoroute-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

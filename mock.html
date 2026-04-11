@@ -178,9 +178,9 @@
 
   <div id="toast" class="toast">Successfully saved!</div>
 
-  <!-- Dependencies -->
-  <script src="/config.js"></script>
-  <script src="/api.js"></script>
+  <!-- Dependencies (Cache-busted to ensure same-day updates) -->
+  <script src="/config.js?t=1775889104"></script>
+  <script src="/api.js?t=1775889104"></script>
 
   <script>
     let map;
@@ -234,6 +234,21 @@
 
     async function loadMocks() {
       console.log('📡 Fetching mocks from server...');
+      
+      // Defensive check for stale API script
+      if (typeof ApiModule.getAdminMocks !== 'function') {
+        console.error('❌ STALE API: ApiModule.getAdminMocks is missing! This is likely a cache issue.');
+        showToast('Stale browser cache detected!', 'red');
+        document.getElementById('list-container').innerHTML = `
+          <div style="color:#EF4444; padding:20px; text-align:center;">
+            <strong>⚠️ Stale Browser Cache detected.</strong><br>
+            The function <code>getAdminMocks</code> is missing. 
+            Please perform a <strong>Hard Refresh</strong> (Ctrl+F5) to load the latest logic.
+          </div>
+        `;
+        return;
+      }
+
       try {
         const res = await ApiModule.getAdminMocks();
         console.log('✅ Mocks received:', res);
