@@ -40,6 +40,13 @@ const MapModule = (() => {
     `;
   }
 
+  function clearUserMarkers() {
+    if (userMarkers && userMarkers.length > 0) {
+      userMarkers.forEach(m => m.remove());
+    }
+    userMarkers = [];
+  }
+
   function initMap() {
     if (!ECOROUTE_CONFIG.MAPBOX_TOKEN || ECOROUTE_CONFIG.MAPBOX_TOKEN === 'YOUR_MAPBOX_TOKEN_HERE') {
       document.getElementById('map-container').innerHTML = `
@@ -481,34 +488,6 @@ const MapModule = (() => {
     }
 
     step();
-  }
-
-  async function addUserPins() {
-    clearUserMarkers();
-    
-    try {
-      // 1. Fetch Real Active Users
-      const res = await fetch('/api/users/active');
-      const realUsers = res.ok ? await res.json() : [];
-      
-      // 2. Fetch Admin Mock Users (Persistence feature)
-      let mockList = [];
-      try {
-        const mockRes = await ApiModule.getAdminMocks();
-        mockList = mockRes || [];
-      } catch(e) { 
-        console.warn('Mocks fetch failed, using static fallback');
-        mockList = MOCK_USERS; 
-      }
-      
-      // Filter mocks that aren't already represented by real users
-      const mockFiltered = mockList.filter(mu => !realUsers.some(ru => ru.name === mu.name));
-      const combined = [...realUsers, ...mockFiltered];
-
-      combined.forEach(user => {
-        // ... logic to add markers ...
-      });
-    } catch(e) { console.error(e); }
   }
 
   async function startCollectionRoute() {
