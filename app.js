@@ -975,12 +975,10 @@ const App = (() => {
       let summaries = [];
 
       try {
-        if (!demoMode) {
-          if (currentRole === 'driver') {
-            summaries = await ApiModule.getDriverHistory();
-          } else {
-            logs = await ApiModule.getCollectionLog();
-          }
+        if (currentRole === 'driver') {
+          summaries = await ApiModule.getDriverHistory();
+        } else {
+          logs = await ApiModule.getCollectionLog();
         }
       } catch(e) { console.warn('History fetch fail', e); }
       

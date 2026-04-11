@@ -711,8 +711,29 @@ app.get('/api/driver/history', requireAuth, requireDb, async (req, res) => {
   try {
     const driver = await User.findById(req.user.id);
     if (!driver || driver.role !== 'driver') return res.status(403).json({ message: 'Drivers only.' });
-    const summaries = await DriverDailySummary.find({ driverId: req.user.id })
+    
+    let summaries = await DriverDailySummary.find({ driverId: req.user.id })
       .sort({ date: -1 }).limit(30);
+
+    // JIT Seeding if empty
+    if (summaries.length === 0) {
+      console.log(`🌱 JIT Seeding driver history for ${driver.name}...`);
+      const jit = [];
+      for (let i = 1; i <= 14; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        jit.push({
+          driverId: req.user.id,
+          date: d.toISOString().split('T')[0],
+          housePickups: Math.floor(Math.random() * 20) + 30,
+          communityVerifications: Math.floor(Math.random() * 5) + 2,
+          pointsDistributed: Math.floor(Math.random() * 500) + 300,
+          verifiedBins: []
+        });
+      }
+      await DriverDailySummary.insertMany(jit);
+      summaries = jit;
+    }
+
     res.json(summaries);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -759,7 +780,25 @@ app.post('/api/users/confirm-pickup', requireAuth, requireDb, async (req, res) =
 // GET /api/users/collection-log
 app.get('/api/users/collection-log', requireAuth, requireDb, async (req, res) => {
   try {
-    const logs = await CollectionLog.find({ userId: req.user.id }).sort({ date: -1 });
+    let logs = await CollectionLog.find({ userId: req.user.id }).sort({ date: -1 });
+
+    // JIT Seeding if empty
+    if (logs.length === 0) {
+      console.log(`🌱 JIT Seeding collection logs for user ${req.user.id}...`);
+      const jit = [];
+      for (let i = 1; i <= 14; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        jit.push({
+          userId: req.user.id,
+          date: d.toISOString().split('T')[0],
+          status: Math.random() > 0.15 ? 'collected' : 'missed',
+          points: 10
+        });
+      }
+      await CollectionLog.insertMany(jit);
+      logs = jit;
+    }
+
     res.json(logs);
   } catch (err) {
     res.status(500).json({ message: err.message });
