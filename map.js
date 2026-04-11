@@ -427,7 +427,20 @@ const MapModule = (() => {
     try {
       const res = await fetch('/api/users/active');
       const activeUsers = await res.json();
-      const usersToVisit = activeUsers.filter(u => (u.fillLevel || 0) >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD && u.isActiveToday !== false);
+      
+      // Merge real active users with active mock users
+      const realActive = activeUsers.filter(u => {
+        const fill = u.fillLevel || 0;
+        return u.isActiveToday === true || (u.isActiveToday === null && fill >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD);
+      });
+
+      const mockActive = MOCK_USERS.filter(mu => {
+        // Only use mocks that aren't already represented by real users (by name)
+        const isAlreadyReal = activeUsers.some(ru => ru.name === mu.name);
+        return !isAlreadyReal && mu.fillLevel >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD;
+      });
+
+      const usersToVisit = [...realActive, ...mockActive];
 
       if (usersToVisit.length === 0) {
         App.showToast('No active users needing pickup today', 'info');
@@ -437,7 +450,7 @@ const MapModule = (() => {
       // Build waypoints: depot → active users → dump yard
       const waypoints = [
         ECOROUTE_CONFIG.DEPOT,
-        ...usersToVisit.map(u => ({ lng: u.lng, lat: u.lat })),
+        ...usersToVisit.map(u => ({ lng: u.lng || u.location?.lng, lat: u.lat || u.location?.lat })),
         ECOROUTE_CONFIG.DUMP_YARD
       ];
 
