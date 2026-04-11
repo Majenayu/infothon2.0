@@ -324,6 +324,40 @@ const App = (() => {
     if (tab === 'history')     renderHistory('calendar');
     if (tab === 'leaderboard') renderLeaderboard();
     if (tab === 'profile')     renderProfile();
+
+    updateRoleGlobalUI();
+  }
+
+  // ── Global role-based UI toggles (Map buttons, nav tabs, etc) ──
+  function updateRoleGlobalUI() {
+    const routeBtn   = document.getElementById('route-start-btn');
+    const overloadBtn = document.getElementById('overload-btn');
+    const statusBanner = document.getElementById('status-banner');
+    const statsRow     = document.querySelector('.stats-row');
+    const rewardsTab   = document.querySelector('.nav-item[data-tab="leaderboard"]');
+    const fillPanel    = document.getElementById('fill-panel');
+    const driverPane   = document.getElementById('driver-panel');
+    const mapLabel     = document.getElementById('map-mode-label');
+
+    if (currentRole === 'driver') {
+      if (statusBanner) statusBanner.style.display = 'none';
+      if (statsRow)     statsRow.style.display     = 'none';
+      if (rewardsTab)   rewardsTab.style.display   = 'none';
+      if (fillPanel)    fillPanel.style.display    = 'none';
+      if (driverPane)   driverPane.style.display   = 'block';
+      if (routeBtn)     routeBtn.style.display     = 'flex';
+      if (overloadBtn)  overloadBtn.style.display    = 'block';
+      if (mapLabel)     mapLabel.textContent       = 'Driver View';
+    } else {
+      if (statusBanner) statusBanner.style.display = 'flex';
+      if (statsRow)     statsRow.style.display     = 'flex';
+      if (rewardsTab)   rewardsTab.style.display   = 'flex';
+      if (fillPanel)    fillPanel.style.display    = 'flex';
+      if (driverPane)   driverPane.style.display   = 'none';
+      if (routeBtn)     routeBtn.style.display     = 'none';
+      if (overloadBtn)  overloadBtn.style.display    = 'none';
+      if (mapLabel)     mapLabel.textContent       = 'Community Map';
+    }
   }
 
   // ════════════════════════════════════════════════════════
@@ -345,18 +379,8 @@ const App = (() => {
 
   // ── Role-locked home content (no switcher) ────────────────
   async function renderRoleHomeContent() {
-    const area       = document.getElementById('home-content-area');
-    const fillPanel  = document.getElementById('fill-panel');
-    const driverPane = document.getElementById('driver-panel');
-    const mapLabel   = document.getElementById('map-mode-label');
-    const routeBtn   = document.getElementById('route-start-btn');
-    const overloadBtn = document.getElementById('overload-btn');
-
-    // UI elements to hide for driver
-    const statusBanner = document.getElementById('status-banner');
-    const statsRow     = document.querySelector('.stats-row');
-    const rewardsTab   = document.querySelector('.nav-item[data-tab="leaderboard"]');
-
+    // UI toggles are now handled by updateRoleGlobalUI()
+    
     let isBlocked = false;
     if (currentRole === 'home') {
       try {
@@ -368,39 +392,14 @@ const App = (() => {
     }
 
     if (currentRole === 'driver') {
-      if (statusBanner) statusBanner.style.display = 'none';
-      if (statsRow)     statsRow.style.display     = 'none';
-      if (rewardsTab)   rewardsTab.style.display   = 'none';
-
-      if (area)       area.innerHTML = '';
-      if (fillPanel)  fillPanel.style.display  = 'none';
-      if (driverPane) driverPane.style.display = 'block';
-      if (routeBtn)   routeBtn.style.display   = 'flex';
-      if (overloadBtn) overloadBtn.style.display = 'block';
-      if (mapLabel)   mapLabel.textContent      = 'Driver View';
-      
       const el = document.getElementById('driver-active-count');
       if (el) el.textContent = MOCK_USERS.filter(u => u.fillLevel >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD).length;
       // Refresh today's bin-verify summary counts
       refreshDriverSummary();
 
     } else if (currentRole === 'point' || (currentRole === 'home' && isBlocked && user.isActiveToday !== true)) {
-      if (statusBanner) {
-        if (currentRole === 'point') statusBanner.style.display = 'flex';
-        else statusBanner.style.display = 'none'; // hide confirm banner for blocked unconfirmed home user
-      }
-      if (statsRow)     statsRow.style.display     = 'flex';
-      if (rewardsTab)   rewardsTab.style.display   = 'flex';
-
-      if (driverPane) driverPane.style.display = 'none';
-      if (fillPanel)  fillPanel.style.display  = 'flex';
-      if (routeBtn)   routeBtn.style.display   = 'none';
-      if (overloadBtn) overloadBtn.style.display = 'none';
-      if (mapLabel)   mapLabel.textContent      = 'Community Map';
-
-      let messageSub = '3 community points within 500m of you';
-      if (currentRole === 'home' && isBlocked) {
-        messageSub = 'Route locked. Use community points.';
+      if (statusBanner && currentRole !== 'point') {
+         statusBanner.style.display = 'none'; // hide confirm banner for blocked unconfirmed home user
       }
 
       if (area) {
@@ -408,15 +407,6 @@ const App = (() => {
       }
     } else {
       // Home user (default)
-      if (statusBanner) statusBanner.style.display = 'flex';
-      if (statsRow)     statsRow.style.display     = 'flex';
-      if (rewardsTab)   rewardsTab.style.display   = 'flex';
-
-      if (driverPane) driverPane.style.display = 'none';
-      if (fillPanel)  fillPanel.style.display  = 'flex';
-      if (routeBtn)   routeBtn.style.display   = 'none';
-      if (mapLabel)   mapLabel.textContent      = 'Community Map';
-      
       const addr = user.address || 'Tap to set your location';
       if (area) area.innerHTML = `
         <div class="home-hero-card card-home" onclick="App.navigate('confirm')">

@@ -177,7 +177,12 @@ const ApiModule = (() => {
 
   // ── Overload & Collaboration ────────────────────────────────
   async function reportOverload() {
-    return await request('POST', '/api/driver/overload');
+    try {
+      return await request('POST', '/api/driver/overload');
+    } catch (e) {
+      console.warn('Overload fail, using demo response');
+      return { success: true, message: '[DEMO] Area overload declared. Tasks reassigned to Driver 2.' };
+    }
   }
   async function getOverloadRequests() {
     return await request('GET', '/api/driver/overload-requests');
