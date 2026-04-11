@@ -157,6 +157,20 @@ const ApiModule = (() => {
     return await request('GET', '/api/notifications/latest');
   }
 
+  // ── Mock Admin
+  async function getAdminMocks() {
+    return await request('GET', '/api/admin/mocks');
+  }
+  async function createAdminMock(data) {
+    return await request('POST', '/api/admin/mocks', data);
+  }
+  async function updateAdminMock(id, data) {
+    return await request('PATCH', `/api/admin/mocks/${id}`, data);
+  }
+  async function deleteAdminMock(id) {
+    return await request('DELETE', `/api/admin/mocks/${id}`);
+  }
+
   async function resetAllUserPreferences() {
     return await request('POST', '/api/driver/reset-all-preferences');
   }

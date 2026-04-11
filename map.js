@@ -90,9 +90,18 @@ const MapModule = (() => {
       const res = await fetch('/api/users/active');
       const realUsers = await res.json();
 
-      // Merge real users with mock users so the map is always populated
-      // We filter out any real users from the mock data if they somehow exist (by name matching)
-      const mockFiltered = MOCK_USERS.filter(mu => !realUsers.some(ru => ru.name === mu.name));
+      // 1. Fetch Admin Mock Users from DB
+      let mockList = [];
+      try {
+        const mockRes = await ApiModule.getAdminMocks();
+        mockList = mockRes || [];
+      } catch(e) { 
+        console.warn('Mocks fetch failed, using static fallback');
+        mockList = MOCK_USERS; 
+      }
+
+      // 2. Merge real users with mock list
+      const mockFiltered = mockList.filter(mu => !realUsers.some(ru => ru.name === mu.name));
       const usersToShow = [...realUsers, ...mockFiltered];
 
       usersToShow.forEach(user => {
@@ -419,6 +428,34 @@ const MapModule = (() => {
     step();
   }
 
+  async function addUserPins() {
+    clearUserMarkers();
+    
+    try {
+      // 1. Fetch Real Active Users
+      const res = await fetch('/api/users/active');
+      const realUsers = res.ok ? await res.json() : [];
+      
+      // 2. Fetch Admin Mock Users (Persistence feature)
+      let mockList = [];
+      try {
+        const mockRes = await ApiModule.getAdminMocks();
+        mockList = mockRes || [];
+      } catch(e) { 
+        console.warn('Mocks fetch failed, using static fallback');
+        mockList = MOCK_USERS; 
+      }
+      
+      // Filter mocks that aren't already represented by real users
+      const mockFiltered = mockList.filter(mu => !realUsers.some(ru => ru.name === mu.name));
+      const combined = [...realUsers, ...mockFiltered];
+
+      combined.forEach(user => {
+        // ... logic to add markers ...
+      });
+    } catch(e) { console.error(e); }
+  }
+
   async function startCollectionRoute() {
     if (!map) return;
 
@@ -426,17 +463,25 @@ const MapModule = (() => {
 
     try {
       const res = await fetch('/api/users/active');
-      const activeUsers = await res.json();
+      const realUsers = await res.json();
       
+      // 1. Fetch Admin Mock Users from DB
+      let mockList = [];
+      try {
+        const mockRes = await ApiModule.getAdminMocks();
+        mockList = mockRes || [];
+      } catch(e) { 
+        mockList = MOCK_USERS; 
+      }
+
       // Merge real active users with active mock users
-      const realActive = activeUsers.filter(u => {
+      const realActive = realUsers.filter(u => {
         const fill = u.fillLevel || 0;
         return u.isActiveToday === true || (u.isActiveToday === null && fill >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD);
       });
 
-      const mockActive = MOCK_USERS.filter(mu => {
-        // Only use mocks that aren't already represented by real users (by name)
-        const isAlreadyReal = activeUsers.some(ru => ru.name === mu.name);
+      const mockActive = mockList.filter(mu => {
+        const isAlreadyReal = realUsers.some(ru => ru.name === mu.name);
         return !isAlreadyReal && mu.fillLevel >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD;
       });
 
