@@ -662,14 +662,15 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
 .eta-orange { color: var(--orange); font-size: 0.72rem; font-weight: 600; }
 
 .bottom-sheet {
-  position: absolute; bottom: 64px; left: 0; right: 0; z-index: 50;
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 50;
   background: var(--bg2);
   border-radius: 20px 20px 0 0;
   border-top: 1px solid var(--border);
   max-height: 70dvh; overflow-y: auto;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
   box-shadow: 0 -8px 24px rgba(0,0,0,0.5);
+  padding-bottom: 80px;
 }
 .bottom-sheet.is-dragging { transition: none; }
 .sheet-handle {
