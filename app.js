@@ -11,6 +11,7 @@ const App = (() => {
   let mapInitialized = false;
   let deferredInstallPrompt = null;
   let selectedSignupRole = 'home';
+  let historyCache = { logs: null, summaries: null };
 
   // Catch the install prompt early before DOMContentLoaded
   window.addEventListener('beforeinstallprompt', e => {
@@ -280,6 +281,7 @@ const App = (() => {
     currentRole = 'home';
     demoMode    = false;
     activePointBinId = null;
+    historyCache = { logs: null, summaries: null };
 
     document.getElementById('topbar').style.display     = 'none';
     document.getElementById('bottom-nav').style.display = 'none';
@@ -319,7 +321,7 @@ const App = (() => {
     }
     
     if (tab === 'home')        renderHome();
-    if (tab === 'history')     renderHistory('all');
+    if (tab === 'history')     renderHistory('calendar');
     if (tab === 'leaderboard') renderLeaderboard();
     if (tab === 'profile')     renderProfile();
   }
@@ -698,6 +700,7 @@ const App = (() => {
             // Log for calendar
             const todayStr = new Date().toISOString().split('T')[0];
             await ApiModule.addCollectionLog(todayStr, 'collected', ECOROUTE_CONFIG.POINTS.CONFIRM_PICKUP);
+            historyCache.logs = null; // Invalidate cache
           }
           
           if (pill) {
@@ -863,6 +866,7 @@ const App = (() => {
         showToast(`❌ Bin empty at ${name}'s location. No points awarded.`, 'info');
       }
       refreshDriverSummary();
+      historyCache.summaries = null; // Invalidate cache
     } catch(e) {
       showToast('Error submitting verification.', 'error');
     }
@@ -970,23 +974,51 @@ const App = (() => {
     const screenCal = document.getElementById('view-calendar');
     const screenList = document.getElementById('view-list');
     
-    let logs = [];
-    let summaries = [];
-
-    try {
-      if (currentRole === 'driver') {
-        summaries = await ApiModule.getDriverHistory();
-      } else {
-        logs = await ApiModule.getCollectionLog();
-      }
-    } catch(e) { console.warn('History fetch fail', e); }
-
+    // 1. Switch containers immediately for better perceived speed
     if (filter === 'calendar') {
       if (screenCal) screenCal.style.display = 'block';
       if (screenList) screenList.style.display = 'none';
-      
-      const grid = document.getElementById('calendar-grid');
-      const monthName = document.getElementById('calendar-month-name');
+    } else {
+      if (screenCal) screenCal.style.display = 'none';
+      if (screenList) screenList.style.display = 'block';
+    }
+
+    // 2. Determine target elements
+    const grid = document.getElementById('calendar-grid');
+    const monthName = document.getElementById('calendar-month-name');
+    const list = document.getElementById('history-list');
+
+    // 3. Local Caching Logic
+    let logs = historyCache.logs;
+    let summaries = historyCache.summaries;
+
+    const needsFetch = (currentRole === 'driver') ? !summaries : !logs;
+
+    if (needsFetch) {
+      // Show loading indicator
+      if (filter === 'calendar' && grid) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--text3); font-size:0.85rem;">⏳ Loading history...</div>';
+      } else if (filter !== 'calendar' && list) {
+        list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text3); font-size:0.85rem;">⏳ Loading collection list...</div>';
+      }
+
+      try {
+        if (currentRole === 'driver') {
+          summaries = await ApiModule.getDriverHistory();
+          historyCache.summaries = summaries;
+        } else {
+          logs = await ApiModule.getCollectionLog();
+          historyCache.logs = logs;
+        }
+      } catch(e) { 
+        console.warn('History fetch fail', e); 
+        if (filter === 'calendar' && grid) grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--red);">Failed to load history tracking.</div>';
+        return;
+      }
+    }
+
+    // 4. Render Calendar View
+    if (filter === 'calendar') {
       if (!grid || !monthName) return;
       
       const today = new Date();
@@ -1004,19 +1036,18 @@ const App = (() => {
       
       for (let day=1; day<=daysInMonth; day++) {
         const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        
         let content = '';
         let dayClass = '';
         const isToday = (day === today.getDate());
 
         if (currentRole === 'driver') {
-          const sum = summaries.find(s => s.date === dateStr);
+          const sum = (summaries || []).find(s => s.date === dateStr);
           if (sum) {
             content = `<div class="calendar-day-stat">${sum.housePickups || 0}</div>`;
             dayClass = 'active';
           }
         } else {
-          const log = logs.find(l => l.date === dateStr);
+          const log = (logs || []).find(l => l.date === dateStr);
           if (log) {
             content = log.status === 'collected' 
               ? '<div class="calendar-dot green"></div>' 
@@ -1033,15 +1064,14 @@ const App = (() => {
         `;
       }
       grid.innerHTML = html;
-      grid.style.display = 'grid'; // Ensure grid layout
-    } else {
-      if (screenCal) screenCal.style.display = 'none';
-      if (screenList) screenList.style.display = 'block';
-      const list = document.getElementById('history-list');
+      grid.style.display = 'grid';
+    } 
+    // 5. Render List View
+    else {
+      if (!list) return;
 
       if (currentRole === 'driver') {
-        if (!list) return;
-        if (summaries.length === 0) {
+        if (!summaries || summaries.length === 0) {
           list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No collection history recorded yet.</div>';
           return;
         }
@@ -1069,8 +1099,7 @@ const App = (() => {
           `;
         }).join('');
       } else {
-        if (!list) return;
-        if (logs.length === 0) {
+        if (!logs || logs.length === 0) {
           list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No past collections found.</div>';
           return;
         }
