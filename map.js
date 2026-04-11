@@ -132,7 +132,16 @@ const MapModule = (() => {
 
         const color = isActiveReady ? '#22C55E' : '#EF4444';
         const el = document.createElement('div');
-        el.innerHTML = pinSVG(color, user.role === 'point' ? '🗑️' : '🏠');
+        
+        // Use distinct character for houses if emoji fails
+        const isPoint = (user.role || '').toLowerCase() === 'point';
+        const iconChar = isPoint ? '🗑️' : '🏠';
+        const markerLabel = isPoint ? '' : 'H'; // backup text
+
+        el.innerHTML = pinSVG(color, iconChar);
+        if (!isPoint) {
+           el.style.transform = 'scale(1.1)'; // make houses slightly larger
+        }
 
         const popup = new mapboxgl.Popup({ offset: 30, closeButton: false, className: 'eco-popup' })
           .setHTML(`
@@ -170,6 +179,15 @@ const MapModule = (() => {
 
          userMarkers.push(marker);
        });
+
+       // DEBUG: Update Status Pill (Feature Audit)
+       const houseCount = usersToShow.filter(u => (u.role || '').toLowerCase() === 'home').length;
+       const binCount   = usersToShow.filter(u => (u.role || '').toLowerCase() === 'point').length;
+       const pill = document.getElementById('map-status-pill');
+       if (pill) {
+         pill.innerHTML = `🏠 ${houseCount} Houses | 🗑️ ${binCount} Bins`;
+         pill.style.display = 'block';
+       }
 
     } catch (err) {
       console.warn("Failed to fetch real users, using mock data", err);
