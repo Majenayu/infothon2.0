@@ -1453,12 +1453,19 @@ const App = (() => {
 
   function startLiveTracking() {
     if (!navigator.geolocation) return;
+    
+    // Explicit prompt first
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { liveCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude }; },
+      (err) => console.warn('Location prompt denied/failed', err),
+      { enableHighAccuracy: true }
+    );
+
     navigator.geolocation.watchPosition(
       (pos) => {
         liveCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        // If we have a map, and it's the home view, we might want to refresh nearest etc.
       },
-      (err) => console.warn('Geolocation failed', err),
+      (err) => console.warn('Geolocation watch failed', err),
       { enableHighAccuracy: true, maximumAge: 10000 }
     );
   }
@@ -1568,6 +1575,7 @@ const App = (() => {
     setupPWA();
     setupImageUpload();
     setupBottomSheet();
+    toggleBottomSheet(false); // Start hidden for full map view
     startLiveTracking();
 
     // Bottom nav

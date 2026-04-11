@@ -385,24 +385,19 @@ const MapModule = (() => {
         driverWasOnline = true;
         updateDriverMarker(loc.location.lng, loc.location.lat);
 
-        // Feature 4: Fetch and draw the active route for the H-User
-        if (!routeDrawnForObserver) {
-          try {
-            const tripData = await ApiModule.getActiveTrip();
-            if (tripData && tripData.available && tripData.trip.geometry) {
-              drawRoute(tripData.trip.geometry);
-              routeDrawnForObserver = true;
-            }
-          } catch (e) { /* silent */ }
-        }
-
-        // Feature 3: check 20m proximity for the current H-User
-        checkProximityNotification(loc.location);
-
         // Feature 6: Draw Live Street Route (Truck to House)
         const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
         if (userLoc) {
           updateLiveStreetRoute(loc.location, userLoc);
+          
+          // GENERATE VIEW: Auto-zoom once to show user and truck
+          if (!mapGeneratedForObserver) {
+             const bounds = new mapboxgl.LngLatBounds()
+                .extend([loc.location.lng, loc.location.lat])
+                .extend([userLoc.lng, userLoc.lat]);
+             map.fitBounds(bounds, { padding: 80, duration: 1500 });
+             mapGeneratedForObserver = true;
+          }
         }
 
       } else {
@@ -503,7 +498,6 @@ const MapModule = (() => {
       if (!isAnimating || routeStep >= routeCoords.length - 1) {
         isAnimating = false;
         if (routeStep >= routeCoords.length - 1 && currentTripId) {
-          App.handleTripComplete(currentTripId);
           currentTripId = null;
         }
         return;
