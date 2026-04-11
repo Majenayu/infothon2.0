@@ -153,6 +153,10 @@ const ApiModule = (() => {
     return await request('GET', '/api/config');
   }
 
+  async function resetAllUserPreferences() {
+    return await request('POST', '/api/driver/reset-all-preferences');
+  }
+
   return {
     register, login, driverLogin, logout,
     getMe, updateMe,
@@ -161,6 +165,7 @@ const ApiModule = (() => {
     setDriverOnline, getDriverLocation,
     confirmPickup, getCollectionLog, addCollectionLog,
     verifyBin, triggerNotification, getDailySummary, getDriverHistory, submitDriverReport,
-    getActiveTrip, completeTrip, getConfig
+    getActiveTrip, completeTrip, getConfig,
+    resetAllUserPreferences
   };
 })();

@@ -710,6 +710,19 @@
       <span class="profile-row-value" style="color:#FF6B00;">Mon–Sat</span>
     </div>
   </div>
+
+  <!-- Driver Admin Section (Only for Drivers) -->
+  <div id="driver-admin-section" class="profile-section" style="display:none; border-top:2px solid var(--orange);">
+    <div style="padding:14px 16px;font-weight:700;font-size:0.9rem;color:var(--orange);">Driver Admin Actions</div>
+    <div class="profile-row" onclick="App.resetAllUserPreferences()" style="cursor:pointer;">
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span class="profile-row-label" style="color:var(--text1);">Reset Global Daily Preferences</span>
+        <span style="font-size:0.65rem;color:var(--text3);">Clears all "Yes/No" choices for the day</span>
+      </div>
+      <span class="profile-row-value">🔄</span>
+    </div>
+  </div>
+
   <div class="profile-section">
     <div class="profile-row" onclick="App.openLocationPicker()">
       <span class="profile-row-label">📍 Set Exact Location</span>

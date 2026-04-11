@@ -634,6 +634,7 @@ app.get('*', (req, res) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   const interfaces = require('os').networkInterfaces();
   const lan = Object.values(interfaces).flat()
@@ -643,4 +644,40 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`   Local:   http://localhost:${PORT}`);
   console.log(`   Network: http://${lan}:${PORT}`);
   console.log(`   DB:      ${MONGO_URI ? 'MongoDB connected' : '⚠️  Demo mode (no DB)'}\n`);
+});
+
+// ── Daily Preference Auto-Reset (at 11:00 AM) ──────────────────
+// This runs a check every minute to see if it's 11:00 AM
+setInterval(async () => {
+  try {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+    
+    // Check if it's exactly 11:00 AM IST
+    if (timeStr === '11:00') {
+      console.log('🕒 11:00 AM: Auto-resetting daily user preferences...');
+      await User.updateMany({ role: { $in: ['home', 'point'] } }, { isActiveToday: null });
+    }
+  } catch (err) {
+    console.error('Preference auto-reset error:', err.message);
+  }
+}, 60000); // once per minute
+
+// POST /api/driver/reset-all-preferences — Admin Manual Reset
+app.post('/api/driver/reset-all-preferences', requireAuth, requireDb, async (req, res) => {
+  try {
+    const driver = await User.findById(req.user.id);
+    if (!driver || driver.role !== 'driver') {
+      return res.status(403).json({ message: 'Only drivers/admins can perform a global reset.' });
+    }
+
+    const result = await User.updateMany(
+      { role: { $in: ['home', 'point'] } },
+      { isActiveToday: null }
+    );
+
+    res.json({ success: true, message: 'All daily preferences have been reset.', modifiedCount: result.modifiedCount });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });

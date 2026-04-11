@@ -1347,6 +1347,23 @@ const App = (() => {
     if (el('profile-total-points')) el('profile-total-points').textContent = (user.points || 0).toLocaleString();
     if (el('profile-collections'))  el('profile-collections').textContent  = user.collectionsThisMonth || 0;
     if (el('profile-redeemed'))     el('profile-redeemed').textContent     = user.totalRedeemed || 0;
+
+    // Driver Admin section
+    const adminSec = el('driver-admin-section');
+    if (adminSec) {
+      adminSec.style.display = (user.role === 'driver') ? 'block' : 'none';
+    }
+  }
+
+  // ─ Admin: Global Reset ──────────────────────────────────────
+  async function resetAllUserPreferences() {
+    if (!confirm('Are you sure you want to reset all user preferences for today?')) return;
+    try {
+      const res = await ApiModule.resetAllUserPreferences();
+      showToast(`✅ Global Reset Complete! (${res.modifiedCount} users reset)`, 'success');
+    } catch (e) {
+      showToast('Error performing global reset.', 'error');
+    }
   }
 
   // ════════════════════════════════════════════════════════

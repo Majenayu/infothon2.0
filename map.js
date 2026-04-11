@@ -90,13 +90,22 @@ const MapModule = (() => {
       const res = await fetch('/api/users/active');
       const realUsers = await res.json();
 
-      const usersToShow = realUsers.length > 0 ? realUsers : MOCK_USERS;
+      // Merge real users with mock users so the map is always populated
+      // We filter out any real users from the mock data if they somehow exist (by name matching)
+      const mockFiltered = MOCK_USERS.filter(mu => !realUsers.some(ru => ru.name === mu.name));
+      const usersToShow = [...realUsers, ...mockFiltered];
 
       usersToShow.forEach(user => {
         const fill = user.fillLevel || user.fillPercentage || 0;
-        const isActive = fill < 70 && (user.isActiveToday !== false);
+        
+        // Logical "Active" status:
+        // Ready for collection (Green) if:
+        // 1. Manually confirmed (isActiveToday === true)
+        // 2. OR Pending choice and fill is high (isActiveToday === null && fill >= 70)
+        // Red if: Manually declined (false) OR fill is low.
+        const isActiveReady = user.isActiveToday === true || (user.isActiveToday === null && fill >= 70);
 
-        const color = isActive ? '#22C55E' : '#EF4444';
+        const color = isActiveReady ? '#22C55E' : '#EF4444';
         const el = document.createElement('div');
         el.innerHTML = pinSVG(color, user.role === 'point' ? '🗑️' : '🏠');
 
@@ -110,7 +119,7 @@ const MapModule = (() => {
               <div style="font-size:0.75rem;color:#A3A3A3;margin-bottom:8px;">${user.address || 'No address'}</div>
               <div style="display:flex;align-items:center;justify-content:space-between;">
                 <span style="font-size:0.78rem;color:#A3A3A3;">Fill Level</span>
-                <span style="font-size:1rem;font-weight:700;color:${isActive ? '#EF4444' : '#22C55E'}">
+                <span style="font-size:1rem;font-weight:700;color:${isActiveReady ? '#22C55E' : '#EF4444'}">
                   ${fill}%
                 </span>
               </div>
@@ -119,19 +128,26 @@ const MapModule = (() => {
               ">
                 <div style="
                   height:100%;width:${fill}%;
-                  background:${isActive ? '#EF4444' : '#22C55E'};
+                  background:${isActiveReady ? '#22C55E' : '#EF4444'};
                   border-radius:4px;
                 "></div>
+              </div>
+              <div style="font-size:0.65rem;color:${user.isActiveToday === true ? '#22C55E' : (user.isActiveToday === false ? '#EF4444' : '#A3A3A3')};margin-top:8px;text-align:center;font-weight:600;">
+                 ${user.isActiveToday === true ? '✅ CONFIRMED READY' : (user.isActiveToday === false ? '❌ OPTED OUT' : '⌛ PENDING CHOICE')}
               </div>
             </div>
           `);
 
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat([user.lng || user.location?.lng, user.lat || user.location?.lat])
-          .setPopup(popup)
-          .addTo(map);
-
-        userMarkers.push(marker);
+        const lng = user.lng || user.location?.lng;
+        const lat = user.lat || user.location?.lat;
+        
+        if (lng && lat) {
+          const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+            .setLngLat([lng, lat])
+            .setPopup(popup)
+            .addTo(map);
+          userMarkers.push(marker);
+        }
       });
 
     } catch (err) {
