@@ -645,73 +645,25 @@ app.post('/api/driver/overload', requireAuth, requireDb, async (req, res) => {
     // Mark the first area as overloaded
     const areaToOverload = driver.assignedAreas[0];
     
-    // Check if one already exists
-    let reqDoc = await OverloadRequest.findOne({ area: areaToOverload, status: 'pending' });
-    if (!reqDoc) {
-      reqDoc = await OverloadRequest.create({
-        area: areaToOverload,
-        requestedBy: driver.id,
-        expiresAt: new Date(Date.now() + 15000) // 15 seconds to allow UI polling buffering
-      });
+    // Auto-assign to Reserve Driver directly
+    const reserve = await User.findOne({ isReserve: true });
+    if (!reserve) return res.status(404).json({ message: 'Driver 2 (Reserve) not available' });
+
+    if (!reserve.assignedAreas.includes(areaToOverload)) {
+      reserve.assignedAreas.push(areaToOverload);
     }
-    res.status(201).json({ message: 'Overload SOS broadcasted', requestId: reqDoc.id, area: areaToOverload });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
+    reserve.isOnline = true; // Auto-activate their tracking
+    await reserve.save();
 
-app.get('/api/driver/overload-requests', requireAuth, requireDb, async (req, res) => {
-  try {
-    // 1. Force expiration logic check on every poll request
-    const expiredReqs = await OverloadRequest.find({ status: 'pending', expiresAt: { $lt: new Date() } });
-    for (const r of expiredReqs) {
-      r.status = 'assigned_to_reserve';
-      await r.save();
-      // Auto-assign to Reserve Driver
-      const reserve = await User.findOne({ isReserve: true });
-      if (reserve && !reserve.assignedAreas.includes(r.area)) {
-        reserve.assignedAreas.push(r.area);
-        await reserve.save();
-        
-        // Remove from the overwhelmed driver
-        const originalDriver = await User.findById(r.requestedBy);
-        if (originalDriver) {
-          originalDriver.assignedAreas = originalDriver.assignedAreas.filter(a => a !== r.area);
-          await originalDriver.save();
-        }
-        console.log(`⏱️ SOS Expired! Area ${r.area} auto-assigned to Reserve Driver ${reserve.name}`);
-      }
-    }
-
-    // 2. Fetch pending requests NOT created by this driver
-    const activeReqs = await OverloadRequest.find({ status: 'pending', requestedBy: { $ne: req.user.id } });
-    res.json(activeReqs);
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.post('/api/driver/accept-overload', requireAuth, requireDb, async (req, res) => {
-  try {
-    const { requestId } = req.body;
-    const requestDoc = await OverloadRequest.findById(requestId);
-    if (!requestDoc || requestDoc.status !== 'pending') return res.status(400).json({ message: 'Request has already expired or been picked up' });
-
-    requestDoc.status = 'accepted';
-    requestDoc.acceptedBy = req.user.id;
-    await requestDoc.save();
-
-    // 1. Give area to the hero driver
-    const heroDriver = await User.findById(req.user.id);
-    if (heroDriver && !heroDriver.assignedAreas.includes(requestDoc.area)) {
-      heroDriver.assignedAreas.push(requestDoc.area);
-      await heroDriver.save();
-    }
-
-    // 2. Relieve the overwhelmed driver
-    const originalDriver = await User.findById(requestDoc.requestedBy);
-    if (originalDriver) {
-      originalDriver.assignedAreas = originalDriver.assignedAreas.filter(a => a !== requestDoc.area);
-      await originalDriver.save();
-    }
+    // Relieve the overwhelmed driver
+    driver.assignedAreas = driver.assignedAreas.filter(a => a !== areaToOverload);
+    await driver.save();
     
-    res.json({ message: 'Hero accepted! Route bounds updated to include new zone.', area: requestDoc.area });
+    res.status(200).json({ 
+      success: true, 
+      message: 'Route automatically assigned to Driver 2. Their location is now tracking.', 
+      area: areaToOverload 
+    });
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
