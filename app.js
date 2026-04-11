@@ -1443,6 +1443,25 @@ const App = (() => {
     document.getElementById('pwa-install-popup')?.classList.add('show');
   }
 
+  // Handle bottom sheet interaction (Driver map)
+  function setupBottomSheet() {
+    const handle = document.querySelector('.sheet-handle');
+    const sheet  = document.querySelector('.bottom-sheet');
+    if (!handle || !sheet) return;
+
+    handle.addEventListener('click', () => {
+      sheet.classList.toggle('collapsed');
+      if (sheet.classList.contains('collapsed')) {
+        sheet.style.transform = 'translateY(calc(100% - 40px))';
+      } else {
+        sheet.style.transform = 'translateY(0)';
+      }
+    });
+
+    // Also hide on start if needed
+    sheet.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+  }
+
   function hidePWAPopup() {
     document.getElementById('pwa-install-popup')?.classList.remove('show');
   }
@@ -1476,6 +1495,7 @@ const App = (() => {
     hideSplash();
     setupPWA();
     setupImageUpload();
+    setupBottomSheet();
 
     // Bottom nav
     document.querySelectorAll('.nav-item').forEach(item => {

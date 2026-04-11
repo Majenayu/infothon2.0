@@ -447,8 +447,8 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       role: (user.role || 'home').toLowerCase(),
       area: user.area,
       address: user.address,
-      lat: (user.location?.lat || user.lat || 12.3375) + (Math.random() - 0.5) * 0.0001,
-      lng: (user.location?.lng || user.lng || 76.6394) + (Math.random() - 0.5) * 0.0001,
+      lat: (user.location?.lat || user.lat || 12.3375) + (Math.random() - 0.5) * 0.0003,
+      lng: (user.location?.lng || user.lng || 76.6394) + (Math.random() - 0.5) * 0.0003,
       fillLevel: user.fillLevel,
       isActiveToday: user.isActiveToday,
       isMock: false
@@ -464,8 +464,8 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       isHouse: (m.role || 'home').toLowerCase() === 'home',
       area: m.area,
       address: m.address,
-      lat: (Number(m.lat) || 12.3375) + (Math.random() - 0.5) * 0.0001,
-      lng: (Number(m.lng) || 76.6394) + (Math.random() - 0.5) * 0.0001,
+      lat: (Number(m.lat) || 12.3375) + (Math.random() - 0.5) * 0.0003,
+      lng: (Number(m.lng) || 76.6394) + (Math.random() - 0.5) * 0.0003,
       fillLevel: m.fillLevel || Math.floor(Math.random() * 40) + 60,
       isActiveToday: null,
       isMock: true

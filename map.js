@@ -152,7 +152,7 @@ const MapModule = (() => {
       el.innerHTML = pinSVG(color, icon);
       el.style.zIndex = isBin ? '10' : '999'; // Force houses to the very front
       if (!isBin) {
-        el.style.transform = 'scale(1.3)'; // Make houses much bigger
+        el.style.transform = 'scale(1.2)'; // Refined scale
         el.style.filter = 'drop-shadow(0 0 10px rgba(255,215,0,0.8))'; // Glow effect
       }
 
@@ -398,6 +398,13 @@ const MapModule = (() => {
 
         // Feature 3: check 20m proximity for the current H-User
         checkProximityNotification(loc.location);
+
+        // Feature 6: Draw Live Connection Line (Truck to House)
+        const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
+        if (userLoc) {
+          updateLiveConnectionLine(loc.location, userLoc);
+        }
+
       } else {
         if (driverWasOnline) {
           App.showToast('Driver has gone offline.', 'info');
@@ -405,7 +412,47 @@ const MapModule = (() => {
         driverWasOnline = false;
         proximityNotifiedThisSession = false; // reset on driver offline
         if (truckMarker) { truckMarker.remove(); truckMarker = null; }
+        removeLiveConnectionLine();
       }
+    } catch(e) {}
+  }
+
+  function updateLiveConnectionLine(driverLoc, userLoc) {
+    if (!map) return;
+    const geojson = {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'LineString',
+        'coordinates': [
+          [driverLoc.lng, driverLoc.lat],
+          [userLoc.lng, userLoc.lat]
+        ]
+      }
+    };
+
+    if (map.getSource('connection-line')) {
+      map.getSource('connection-line').setData(geojson);
+    } else {
+      map.addSource('connection-line', { 'type': 'geojson', 'data': geojson });
+      map.addLayer({
+        'id': 'connection-line',
+        'type': 'line',
+        'source': 'connection-line',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+          'line-color': '#FF6B00',
+          'line-width': 3,
+          'line-dasharray': [2, 2]
+        }
+      });
+    }
+  }
+
+  function removeLiveConnectionLine() {
+    if (!map) return;
+    try {
+      if (map.getLayer('connection-line')) map.removeLayer('connection-line');
+      if (map.getSource('connection-line')) map.removeSource('connection-line');
     } catch(e) {}
   }
 
@@ -614,7 +661,15 @@ const MapModule = (() => {
     });
   }
 
-  async function routeToNearestPoint(userLng, userLat) {
+  async function routeToNearestPoint() {
+    if (!map) return;
+    const userLoc = (window.App && typeof App.getUserLocation === 'function') ? App.getUserLocation() : null;
+    if (!userLoc) {
+      App.showToast('Cannot detect your location.', 'error');
+      return;
+    }
+    const { lng: userLng, lat: userLat } = userLoc;
+
     const points = MOCK_USERS.filter(u => u.role === 'point');
     if (points.length === 0) return;
 
