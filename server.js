@@ -150,10 +150,10 @@ async function seedMocks() {
   
   console.log('🌱 Seeding Gokulam geometric mock users...');
   const initialMocks = [
-    { id: 'U001', name: 'Rahul Sharma', role: 'home', address: 'Vijayanagar 1st Stage, Mysuru', area: 'gokulam_north', lng: 76.6082, lat: 12.3258, fillLevel: 95, lastReported: '2 hrs ago', points: 1250 },
-    { id: 'U002', name: 'Priya Nair', role: 'home', address: 'Kuvempunagar, Mysuru', area: 'gokulam_north', lng: 76.6231, lat: 12.3441, fillLevel: 88, lastReported: '5 hrs ago', points: 870 },
+    { id: 'U001', name: 'Rahul Sharma', role: 'home', address: 'Vijayanagar 1st Stage, Mysore', area: 'gokulam_north', lng: 76.6082, lat: 12.3258, fillLevel: 95, lastReported: '2 hrs ago', points: 1250 },
+    { id: 'U002', name: 'Priya Nair', role: 'home', address: 'Kuvempunagar, Mysore', area: 'gokulam_north', lng: 76.6231, lat: 12.3441, fillLevel: 88, lastReported: '5 hrs ago', points: 870 },
     { id: 'U003', name: 'Bin — Saraswathipuram', role: 'point', address: 'Saraswathipuram Main Road', area: 'gokulam_north', lng: 76.6358, lat: 12.3312, fillLevel: 92, lastReported: '1 hr ago', points: 2100 },
-    { id: 'U004', name: 'Deepak Hegde', role: 'home', address: 'Jayalakshmipuram, Mysuru', area: 'gokulam_north', lng: 76.6501, lat: 12.3189, fillLevel: 82, lastReported: '3 hrs ago', points: 540 },
+    { id: 'U004', name: 'Deepak Hegde', role: 'home', address: 'Jayalakshmipuram, Mysore', area: 'gokulam_north', lng: 76.6501, lat: 12.3189, fillLevel: 82, lastReported: '3 hrs ago', points: 540 },
     { id: 'U011', name: 'Mock House 1', role: 'home', address: 'Mysuru North', area: 'gokulam_north', lng: 76.6110, lat: 12.3550, fillLevel: 92, lastReported: '1 hr ago', points: 100 },
     { id: 'U012', name: 'Mock House 2', role: 'home', address: 'Mysuru Central', area: 'gokulam_north', lng: 76.6180, lat: 12.3520, fillLevel: 85, lastReported: '3 hrs ago', points: 50 },
     { id: 'U005', name: 'Bin — Gokulam', role: 'point', address: 'Gokulam 3rd Stage', area: 'gokulam_north', lng: 76.6143, lat: 12.3502, fillLevel: 33, lastReported: '8 hrs ago', points: 1680 },
@@ -479,6 +479,7 @@ app.get('/api/users/active', requireDb, async (req, res) => {
       id: m.id,
       name: m.name,
       role: (m.role || 'home').toLowerCase(),
+      isHouse: (m.role || 'home').toLowerCase() === 'home',
       area: m.area,
       address: m.address,
       lat: Number(m.lat) || 12.3375,

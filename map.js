@@ -113,8 +113,8 @@ const MapModule = (() => {
         }
 
         // Coordinate Audit: Support both top-level and nested location object
-        const finalLat = user.lat || (user.location && user.location.lat);
-        const finalLng = user.lng || (user.location && user.location.lng);
+        const finalLat = Number(user.lat || (user.location && user.location.lat));
+        const finalLng = Number(user.lng || (user.location && user.location.lng));
 
         if (!finalLat || !finalLng) {
             console.warn('Skipping marker, invalid coordinates:', user.name, user.id);
@@ -122,26 +122,18 @@ const MapModule = (() => {
         }
 
         const fill = user.fillLevel || 0;
-        
-        // Logical "Active" status:
-        // Ready for collection (Green) if:
-        // 1. Manually confirmed (isActiveToday === true)
-        // 2. OR Pending choice and fill is high (isActiveToday === null && fill >= 70)
-        // Red if: Manually declined (false) OR fill is low.
         const isActiveReady = user.isActiveToday === true || (user.isActiveToday === null && fill >= 70);
-
-        const color = isActiveReady ? '#22C55E' : '#EF4444';
-        const el = document.createElement('div');
         
-        // Use distinct character for houses if emoji fails
-        const isPoint = (user.role || '').toLowerCase() === 'point';
-        const iconChar = isPoint ? '🗑️' : '🏠';
-        const markerLabel = isPoint ? '' : 'H'; // backup text
+        // VISUAL OVERHAUL:
+        // Use BLUE for houses for drivers, so they stand out from bins
+        const isBin = (user.role || '').toLowerCase() === 'point';
+        const color = isBin ? (isActiveReady ? '#22C55E' : '#EF4444') : '#3B82F6'; // Blue for houses
+        const icon  = isBin ? '🗑️' : '🏠';
 
-        el.innerHTML = pinSVG(color, iconChar);
-        if (!isPoint) {
-           el.style.transform = 'scale(1.1)'; // make houses slightly larger
-        }
+        const el = document.createElement('div');
+        el.className = 'eco-marker';
+        el.innerHTML = pinSVG(color, icon);
+        if (!isBin) el.style.zIndex = '50'; // Bring houses to front
 
         const popup = new mapboxgl.Popup({ offset: 30, closeButton: false, className: 'eco-popup' })
           .setHTML(`
@@ -149,7 +141,7 @@ const MapModule = (() => {
               background:#1A1A1A;border:1px solid #2A2A2A;border-radius:12px;
               padding:12px 14px;min-width:180px;font-family:'DM Sans',sans-serif;
             ">
-              <div style="font-weight:700;font-size:0.9rem;color:#F5F5F5;margin-bottom:4px;">${user.name}</div>
+              <div style="font-weight:700;font-size:0.9rem;color:#F5F5F5;margin-bottom:4px;">${user.name} ${isBin ? '(Bin)' : '(House)'}</div>
               <div style="font-size:0.75rem;color:#A3A3A3;margin-bottom:8px;">${user.address || 'No address'}</div>
               <div style="display:flex;align-items:center;justify-content:space-between;">
                 <span style="font-size:0.78rem;color:#A3A3A3;">Fill Level</span>
@@ -166,9 +158,6 @@ const MapModule = (() => {
                   border-radius:4px;
                 "></div>
               </div>
-              <div style="font-size:0.65rem;color:${user.isActiveToday === true ? '#22C55E' : (user.isActiveToday === false ? '#EF4444' : '#A3A3A3')};margin-top:8px;text-align:center;font-weight:600;">
-                 ${user.isActiveToday === true ? '✅ CONFIRMED READY' : (user.isActiveToday === false ? '❌ OPTED OUT' : '⌛ PENDING CHOICE')}
-              </div>
             </div>
           `);
 
@@ -181,13 +170,17 @@ const MapModule = (() => {
        });
 
        // DEBUG: Update Status Pill (Feature Audit)
-       const houseCount = usersToShow.filter(u => (u.role || '').toLowerCase() === 'home').length;
-       const binCount   = usersToShow.filter(u => (u.role || '').toLowerCase() === 'point').length;
+       const houseCount = usersToShow.filter(u => (u.role || '').toLowerCase() === 'home' || u.isHouse).length;
+       const binCount   = usersToShow.filter(u => (u.role || '').toLowerCase() === 'point' && !u.isHouse).length;
        const pill = document.getElementById('map-status-pill');
        if (pill) {
          pill.innerHTML = `🏠 ${houseCount} Houses | 🗑️ ${binCount} Bins`;
          pill.style.display = 'block';
+         if (houseCount === 0) pill.style.borderColor = 'red';
        }
+
+       // Global debug access
+       window.lastMapData = usersToShow;
 
     } catch (err) {
       console.warn("Failed to fetch real users, using mock data", err);
