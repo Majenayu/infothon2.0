@@ -313,6 +313,12 @@ const App = (() => {
         MapModule.startTrackingPolling();
       } else {
         MapModule.stopTrackingPolling();
+        // Ensure zone boundaries are always drawn when driver opens map
+        if (currentRole === 'driver' && mapInitialized) {
+          setTimeout(() => {
+            if (MapModule.refreshBoundaries) MapModule.refreshBoundaries();
+          }, 800);
+        }
       }
     } else {
       MapModule.stopTrackingPolling();

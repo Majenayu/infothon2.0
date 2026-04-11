@@ -73,9 +73,11 @@ const MapModule = (() => {
 
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
 
-    map.on('load', () => {
-      addUserPins();
+    map.on('load', async () => {
+      await addUserPins();
       addDepotPins();
+      // Explicit second call after 1.5s to handle async auth race on first load
+      setTimeout(drawDriverBoundaries, 1500);
     });
 
     return true;
@@ -251,20 +253,20 @@ const MapModule = (() => {
           }
         });
 
-        // Add semi-transparent fill
+        // Semi-transparent red fill — visible on satellite
         map.addLayer({
           'id': layerId,
           'type': 'fill',
           'source': sourceId,
-          'paint': { 'fill-color': '#EF4444', 'fill-opacity': 0.08 }
+          'paint': { 'fill-color': '#FF0000', 'fill-opacity': 0.20 }
         });
         
-        // Add robust bounding box outline
+        // Bold solid red outline
         map.addLayer({
           'id': outlineId,
           'type': 'line',
           'source': sourceId,
-          'paint': { 'line-color': '#EF4444', 'line-width': 2, 'line-dasharray': [4, 2] }
+          'paint': { 'line-color': '#FF3333', 'line-width': 4, 'line-opacity': 1.0 }
         });
       });
     } catch(err) { console.warn('Could not draw boundaries', err); }
@@ -697,6 +699,9 @@ const MapModule = (() => {
     startTrackingPolling,
     stopTrackingPolling,
     toggleStyle,
+    // Expose so app.js can trigger redraw after login
+    refreshBoundaries: drawDriverBoundaries,
+    loadUsersAndRefresh: async () => { await addUserPins(); addDepotPins(); },
     // Feature 3 reset (called externally if needed)
     resetProximityAlert: () => { proximityNotifiedThisSession = false; }
   };
