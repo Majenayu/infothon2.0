@@ -16,6 +16,8 @@ const App = (() => {
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredInstallPrompt = e;
+    // Show the custom install popup after a short delay
+    setTimeout(showPWAPopup, 2500);
   });
 
   // Location picker state
@@ -1462,9 +1464,55 @@ const App = (() => {
         if (dbUser) {
           user = dbUser;
           completeLogin(user.role);
+          
+          // Try to request notification permission after login
+          setTimeout(requestNotificationPermission, 3000);
         }
       }).catch(() => { /* no valid session — show login */ });
     }
+
+    // Start background polling for notifications
+    setInterval(checkNotifications, 45000); // Check every 45s
+  }
+
+  // ─ Notifications: Permission & Check ────────────────────────
+  async function requestNotificationPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        showToast('Notifications enabled! 🔔', 'success');
+      }
+    }
+  }
+
+  let lastNotifDate = null;
+  async function checkNotifications() {
+    if (!user || user.role === 'driver') return;
+    try {
+      const alerts = await ApiModule.getLatestNotifications();
+      if (alerts && alerts.length > 0) {
+        const latest = alerts[0];
+        const alertTime = new Date(latest.timestamp).getTime();
+        
+        // If we haven't seen this specific alert before (or it's from the last minute)
+        if (!lastNotifDate || alertTime > lastNotifDate) {
+          lastNotifDate = alertTime;
+          
+          // Trigger System Notification
+          if (Notification.permission === 'granted') {
+            new Notification(latest.title, {
+              body: latest.body,
+              icon: '/icons/icon-192.png'
+            });
+          }
+          
+          // Force badge update if not on home
+          const badge = document.getElementById('notif-badge');
+          if (badge) badge.style.display = 'block';
+        }
+      }
+    } catch (e) { console.warn('Polling check failed'); }
   }
 
   return {

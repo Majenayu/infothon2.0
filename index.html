@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="EcoRoute"/>
   <meta name="description" content="Smart Real-Time Waste Collection System — EcoRoute"/>
+  <link rel="manifest" href="/manifest.json"/>
 
   <title>EcoRoute — Smart Waste. Smarter Cities.</title>
 
@@ -830,6 +831,16 @@
 <script src="/data.js"></script>
 <script src="/map.js"></script>
 <script src="/app.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('✅ Service Worker registered', reg))
+        .catch(err => console.error('❌ Service Worker failed', err));
+    });
+  }
+</script>
 
 
 

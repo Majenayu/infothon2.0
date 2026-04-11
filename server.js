@@ -89,6 +89,15 @@ const collectionLogSchema = new mongoose.Schema({
 }, { timestamps: true });
 const CollectionLog = mongoose.models.CollectionLog || mongoose.model('CollectionLog', collectionLogSchema);
 
+const publicNotificationSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  body: { type: String, required: true },
+  role: { type: String, default: 'home' },
+  type: { type: String, default: 'morning_alert' },
+  timestamp: { type: Date, default: Date.now }
+}, { expires: 86400 }); // Expire logs after 24 hrs
+const PublicNotification = mongoose.models.PublicNotification || mongoose.model('PublicNotification', publicNotificationSchema);
+
 // Driver daily summary — tracks what the driver verified/collected each day
 const driverDailySummarySchema = new mongoose.Schema({
   driverId: { type: String, required: true },
@@ -498,17 +507,31 @@ app.post('/api/driver/trigger-notification', requireAuth, requireDb, async (req,
       return res.status(403).json({ message: 'Only drivers can trigger notifications.' });
     }
 
-    // Return all home users who haven't confirmed yet today so frontend can notify them
-    const homeUsers = await User.find(
-      { role: 'home' },
-      { _id: 1, name: 1, location: 1, fcmToken: 1, isActiveToday: 1 }
-    );
+    // Save to broadcast collection so all Home users see it
+    await PublicNotification.create({
+      title: '📢 Morning Pickup Alert',
+      body: `Driver ${driver.name} has started the route. Confirm your bin pickup today!`,
+      role: 'home',
+      type: 'morning_alert'
+    });
 
     res.json({
       success: true,
       count: homeUsers.length,
       users: homeUsers
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/notifications/latest — Fetch active alerts for current role
+app.get('/api/notifications/latest', requireAuth, requireDb, async (req, res) => {
+  try {
+    const alerts = await PublicNotification.find({ role: req.user.role })
+      .sort({ timestamp: -1 })
+      .limit(5);
+    res.json(alerts);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -153,6 +153,10 @@ const ApiModule = (() => {
     return await request('GET', '/api/config');
   }
 
+  async function getLatestNotifications() {
+    return await request('GET', '/api/notifications/latest');
+  }
+
   async function resetAllUserPreferences() {
     return await request('POST', '/api/driver/reset-all-preferences');
   }
