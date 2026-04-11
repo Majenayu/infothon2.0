@@ -650,23 +650,8 @@ app.use(express.static(__dirname));
 // API routes above this...
 
 // SPA fallback (IMPORTANT)
-
-
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// ── Start ─────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  const interfaces = require('os').networkInterfaces();
-  const lan = Object.values(interfaces).flat()
-    .find(i => i.family === 'IPv4' && !i.internal)?.address || 'your-ip';
-
-  console.log(`\n🚛 EcoRoute server running`);
-  console.log(`   Local:   http://localhost:${PORT}`);
-  console.log(`   Network: http://${lan}:${PORT}`);
-  console.log(`   DB:      ${MONGO_URI ? 'MongoDB connected' : '⚠️  Demo mode (no DB)'}\n`);
 });
 
 // ── Daily Preference Auto-Reset (at 11:00 AM) ──────────────────
@@ -703,4 +688,16 @@ app.post('/api/driver/reset-all-preferences', requireAuth, requireDb, async (req
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+// ── Start Server ──────────────────────────────────────────────
+app.listen(PORT, '0.0.0.0', () => {
+  const interfaces = require('os').networkInterfaces();
+  const lan = Object.values(interfaces).flat()
+    .find(i => i.family === 'IPv4' && !i.internal)?.address || 'your-ip';
+
+  console.log(`\n🚛 EcoRoute server running`);
+  console.log(`   Local:   http://localhost:${PORT}`);
+  console.log(`   Network: http://${lan}:${PORT}`);
+  console.log(`   DB:      ${MONGO_URI ? 'MongoDB connected' : '⚠️  Demo mode (no DB)'}\n`);
 });
