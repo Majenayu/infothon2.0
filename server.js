@@ -715,23 +715,30 @@ app.get('/api/driver/history', requireAuth, requireDb, async (req, res) => {
     let summaries = await DriverDailySummary.find({ driverId: req.user.id })
       .sort({ date: -1 }).limit(30);
 
-    // JIT Seeding if empty
-    if (summaries.length === 0) {
-      console.log(`🌱 JIT Seeding driver history for ${driver.name}...`);
-      const jit = [];
+    // JIT Seeding if missing history
+    if (summaries.length < 14) {
+      console.log(`🌱 Filling historical gaps for driver ${driver.name}...`);
       for (let i = 1; i <= 14; i++) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        jit.push({
-          driverId: req.user.id,
-          date: d.toISOString().split('T')[0],
-          housePickups: Math.floor(Math.random() * 20) + 30,
-          communityVerifications: Math.floor(Math.random() * 5) + 2,
-          pointsDistributed: Math.floor(Math.random() * 500) + 300,
-          verifiedBins: []
-        });
+        const dateStr = d.toISOString().split('T')[0];
+        
+        await DriverDailySummary.findOneAndUpdate(
+          { driverId: req.user.id, date: dateStr },
+          {
+            $setOnInsert: {
+              housePickups: Math.floor(Math.random() * 20) + 30,
+              communityVerifications: Math.floor(Math.random() * 5) + 2,
+              pointsDistributed: Math.floor(Math.random() * 500) + 300,
+              verifiedBins: []
+            }
+          },
+          { upsert: true }
+        );
       }
-      await DriverDailySummary.insertMany(jit);
-      summaries = jit;
+      
+      // Re-fetch to include the newly generated gaps
+      summaries = await DriverDailySummary.find({ driverId: req.user.id })
+        .sort({ date: -1 }).limit(30);
     }
 
     res.json(summaries);
@@ -782,21 +789,27 @@ app.get('/api/users/collection-log', requireAuth, requireDb, async (req, res) =>
   try {
     let logs = await CollectionLog.find({ userId: req.user.id }).sort({ date: -1 });
 
-    // JIT Seeding if empty
-    if (logs.length === 0) {
-      console.log(`🌱 JIT Seeding collection logs for user ${req.user.id}...`);
-      const jit = [];
+    // JIT Seeding if missing history
+    if (logs.length < 14) {
+      console.log(`🌱 Filling historical gaps for user ${req.user.id}...`);
       for (let i = 1; i <= 14; i++) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        jit.push({
-          userId: req.user.id,
-          date: d.toISOString().split('T')[0],
-          status: Math.random() > 0.15 ? 'collected' : 'missed',
-          points: 10
-        });
+        const dateStr = d.toISOString().split('T')[0];
+        
+        await CollectionLog.findOneAndUpdate(
+          { userId: req.user.id, date: dateStr },
+          {
+            $setOnInsert: {
+              status: Math.random() > 0.15 ? 'collected' : 'missed',
+              points: 10
+            }
+          },
+          { upsert: true }
+        );
       }
-      await CollectionLog.insertMany(jit);
-      logs = jit;
+      
+      // Re-fetch to include the newly generated gaps
+      logs = await CollectionLog.find({ userId: req.user.id }).sort({ date: -1 });
     }
 
     res.json(logs);
