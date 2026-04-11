@@ -91,144 +91,90 @@ const MapModule = (() => {
   async function addUserPins() {
     clearUserMarkers();
     
+    let usersToShow = [];
+    let isFallback = false;
+
+    const currentRole = (window.App && typeof App.getCurrentRole === 'function') ? App.getCurrentRole() : 'home';
+    const currentUser = (window.App && typeof App.getCurrentUser === 'function') ? App.getCurrentUser() : null;
+
     try {
-      // 1. Fetch Unified Active Users (Real + DB Mocks) securely with driver token
       const headers = {};
       if (window.ApiModule && ApiModule.getToken()) {
         headers['Authorization'] = `Bearer ${ApiModule.getToken()}`;
       }
       const res = await fetch('/api/users/active', { headers });
-      const usersToShow = res.ok ? await res.json() : MOCK_USERS; 
-      
-      const currentRole = (window.App && typeof App.getCurrentRole === 'function') ? App.getCurrentRole() : 'home';
-      const currentUser = (window.App && typeof App.getCurrentUser === 'function') ? App.getCurrentUser() : null;
-
-      usersToShow.forEach(user => {
-        // DRIVER: Sees EVERYTHING in demo
-        // OTHERS: Only see community points and their own location
-        if (currentRole !== 'driver') {
-           if (user.role !== 'point' && (!currentUser || user.id !== currentUser.id)) {
-             return;
-           }
-        }
-
-        // Coordinate Audit: Support both top-level and nested location object
-        const finalLat = Number(user.lat || (user.location && user.location.lat));
-        const finalLng = Number(user.lng || (user.location && user.location.lng));
-
-        if (!finalLat || !finalLng) {
-            console.warn('Skipping marker, invalid coordinates:', user.name, user.id);
-            return;
-        }
-
-        const fill = user.fillLevel || 0;
-        const isActiveReady = user.isActiveToday === true || (user.isActiveToday === null && fill >= 70);
-        
-        // VISUAL OVERHAUL:
-        // Use BLUE for houses for drivers, so they stand out from bins
-        const isBin = (user.role || '').toLowerCase() === 'point';
-        const color = isBin ? (isActiveReady ? '#22C55E' : '#EF4444') : '#3B82F6'; // Blue for houses
-        const icon  = isBin ? '🗑️' : '🏠';
-
-        const el = document.createElement('div');
-        el.className = 'eco-marker';
-        el.innerHTML = pinSVG(color, icon);
-        if (!isBin) el.style.zIndex = '50'; // Bring houses to front
-
-        const popup = new mapboxgl.Popup({ offset: 30, closeButton: false, className: 'eco-popup' })
-          .setHTML(`
-            <div style="
-              background:#1A1A1A;border:1px solid #2A2A2A;border-radius:12px;
-              padding:12px 14px;min-width:180px;font-family:'DM Sans',sans-serif;
-            ">
-              <div style="font-weight:700;font-size:0.9rem;color:#F5F5F5;margin-bottom:4px;">${user.name} ${isBin ? '(Bin)' : '(House)'}</div>
-              <div style="font-size:0.75rem;color:#A3A3A3;margin-bottom:8px;">${user.address || 'No address'}</div>
-              <div style="display:flex;align-items:center;justify-content:space-between;">
-                <span style="font-size:0.78rem;color:#A3A3A3;">Fill Level</span>
-                <span style="font-size:1rem;font-weight:700;color:${isActiveReady ? '#22C55E' : '#EF4444'}">
-                  ${fill}%
-                </span>
-              </div>
-              <div style="
-                height:6px;background:#222;border-radius:4px;margin-top:6px;overflow:hidden;
-              ">
-                <div style="
-                  height:100%;width:${fill}%;
-                  background:${isActiveReady ? '#22C55E' : '#EF4444'};
-                  border-radius:4px;
-                "></div>
-              </div>
-            </div>
-          `);
-
-         const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-           .setLngLat([finalLng, finalLat])
-           .setPopup(popup)
-           .addTo(map);
-
-         userMarkers.push(marker);
-       });
-
-       // DEBUG: Update Status Pill (Feature Audit)
-       const houseCount = usersToShow.filter(u => (u.role || '').toLowerCase() === 'home' || u.isHouse).length;
-       const binCount   = usersToShow.filter(u => (u.role || '').toLowerCase() === 'point' && !u.isHouse).length;
-       const pill = document.getElementById('map-status-pill');
-       if (pill) {
-         pill.innerHTML = `🏠 ${houseCount} Houses | 🗑️ ${binCount} Bins`;
-         pill.style.display = 'block';
-         if (houseCount === 0) pill.style.borderColor = 'red';
-       }
-
-       // Global debug access
-       window.lastMapData = usersToShow;
-
+      if (res.ok) {
+        usersToShow = await res.json();
+      } else {
+        throw new Error('API down');
+      }
     } catch (err) {
-      console.warn("Failed to fetch real users, using mock data", err);
-      // fallback to mock
-      MOCK_USERS.forEach(user => {
-        const isActive = user.fillLevel >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD;
-        const color = isActive ? '#22C55E' : '#EF4444';
-        const el = document.createElement('div');
-        el.innerHTML = pinSVG(color, user.role === 'point' ? '🗑' : '🏠');
-
-        const popup = new mapboxgl.Popup({ offset: 30, closeButton: false, className: 'eco-popup' })
-          .setHTML(`
-            <div style="
-              background:#1A1A1A;border:1px solid #2A2A2A;border-radius:12px;
-              padding:12px 14px;min-width:180px;font-family:'DM Sans',sans-serif;
-            ">
-              <div style="font-weight:700;font-size:0.9rem;color:#F5F5F5;margin-bottom:4px;">${user.name}</div>
-              <div style="font-size:0.75rem;color:#A3A3A3;margin-bottom:8px;">${user.address}</div>
-              <div style="display:flex;align-items:center;justify-content:space-between;">
-                <span style="font-size:0.78rem;color:#A3A3A3;">Fill Level</span>
-                <span style="font-size:1rem;font-weight:700;color:${isActive ? '#EF4444' : '#22C55E'}">
-                  ${user.fillLevel}%
-                </span>
-              </div>
-              <div style="
-                height:6px;background:#222;border-radius:4px;margin-top:6px;overflow:hidden;
-              ">
-                <div style="
-                  height:100%;width:${user.fillLevel}%;
-                  background:${isActive ? '#EF4444' : '#22C55E'};
-                  border-radius:4px;
-                "></div>
-              </div>
-              <div style="font-size:0.7rem;color:#525252;margin-top:6px;">
-                Reported ${user.lastReported}
-              </div>
-            </div>
-          `);
-
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat([user.lng, user.lat])
-          .setPopup(popup)
-          .addTo(map);
-
-        userMarkers.push(marker);
-      });
+      console.warn("Failed to fetch live users, using mock data", err);
+      usersToShow = MOCK_USERS;
+      isFallback = true;
     }
-    
+
+    if (!usersToShow || usersToShow.length === 0) return;
+
+    usersToShow.forEach(user => {
+      // DRIVER: Sees EVERYTHING in demo
+      // OTHERS: Only see community points and their own location
+      if (currentRole !== 'driver') {
+         if (user.role !== 'point' && (!currentUser || user.id !== currentUser.id)) {
+           return;
+         }
+      }
+
+      // Coordinate Audit
+      const finalLat = Number(user.lat || (user.location && user.location.lat));
+      const finalLng = Number(user.lng || (user.location && user.location.lng));
+
+      if (!finalLat || !finalLng) return;
+
+      const fill = user.fillLevel || 0;
+      const isActiveReady = user.isActiveToday === true || (user.isActiveToday === null && fill >= 70);
+      
+      const isBin = (user.role || '').toLowerCase() === 'point';
+      const color = isBin ? (isActiveReady ? '#22C55E' : '#EF4444') : '#3B82F6'; // Blue for houses
+      const icon  = isBin ? '🗑️' : '🏠';
+
+      const el = document.createElement('div');
+      el.className = 'eco-marker';
+      el.innerHTML = pinSVG(color, icon);
+      if (!isBin) el.style.zIndex = '50';
+
+      const popup = new mapboxgl.Popup({ offset: 30, closeButton: false, className: 'eco-popup' })
+        .setHTML(`
+          <div style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:12px;padding:12px 14px;min-width:180px;font-family:'DM Sans',sans-serif;">
+            <div style="font-weight:700;font-size:0.9rem;color:#F5F5F5;margin-bottom:4px;">${user.name} ${isBin ? '(Bin)' : '(House)'}</div>
+            <div style="font-size:0.75rem;color:#A3A3A3;margin-bottom:8px;">${user.address || 'Mysuru'}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:0.78rem;color:#A3A3A3;">Fill Level</span>
+              <span style="font-size:1rem;font-weight:700;color:${isActiveReady ? '#22C55E' : '#EF4444'}">${fill}%</span>
+            </div>
+            <div style="height:6px;background:#222;border-radius:4px;margin-top:6px;overflow:hidden;">
+              <div style="height:100%;width:${fill}%;background:${isActiveReady ? '#22C55E' : '#EF4444'};border-radius:4px;"></div>
+            </div>
+          </div>
+        `);
+
+       const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+         .setLngLat([finalLng, finalLat])
+         .setPopup(popup)
+         .addTo(map);
+
+       userMarkers.push(marker);
+    });
+
+    // Update Status Pill
+    const hCount = usersToShow.filter(u => (u.role || '').toLowerCase() === 'home' || u.isHouse).length;
+    const bCount = usersToShow.filter(u => (u.role || '').toLowerCase() === 'point' && !u.isHouse).length;
+    const pill = document.getElementById('map-status-pill');
+    if (pill) {
+      pill.innerHTML = `🏠 ${hCount} Houses | 🗑️ ${bCount} Bins ${isFallback ? '(Demo Mode)' : ''}`;
+      pill.style.display = 'block';
+    }
+
     // Draw driver bounding areas visually
     await drawDriverBoundaries();
   }
@@ -477,12 +423,10 @@ const MapModule = (() => {
     routeCoords = coords;
     routeStep = 0;
     isAnimating = true;
-    let lastStep = 0;
 
     function step() {
       if (!isAnimating || routeStep >= routeCoords.length - 1) {
         isAnimating = false;
-        // Feature 5: Trip completion trigger
         if (routeStep >= routeCoords.length - 1 && currentTripId) {
           App.handleTripComplete(currentTripId);
           currentTripId = null;
@@ -492,7 +436,6 @@ const MapModule = (() => {
       const cur  = routeCoords[routeStep];
       const next = routeCoords[Math.min(routeStep + 1, routeCoords.length - 1)];
 
-      // Bearing
       const bearing = turf.bearing(
         turf.point(cur),
         turf.point(next)
@@ -504,32 +447,37 @@ const MapModule = (() => {
         if (el) el.style.transform = `rotate(${bearing}deg)`;
       }
 
-      // Update ETA
       const remaining = routeCoords.length - routeStep;
       const etaMins = Math.max(1, Math.round(remaining / 60));
       const etaEl = document.getElementById('eta-mins');
       if (etaEl) etaEl.textContent = `${etaMins} mins`;
 
-      routeStep += 1; // smooth animation (1 coord per frame)
+      routeStep += 1;
       routeAnimFrame = requestAnimationFrame(step);
     }
-
     step();
   }
 
   async function startCollectionRoute() {
     if (!map) return;
-
     App.showToast('Fetching route...', 'info');
 
+    let usersToShow = [];
     try {
-      // 1. Fetch Unified Active Users (Real + DB Mocks)
       const res = await fetch('/api/users/active');
-      const usersToShow = res.ok ? await res.json() : [];
-      
+      if (res.ok) {
+        usersToShow = await res.json();
+      } else {
+        throw new Error('API down');
+      }
+    } catch (err) {
+      console.warn('Fallback to MOCK_USERS for routing', err);
+      usersToShow = MOCK_USERS;
+    }
+    
+    try {
       const usersToVisit = usersToShow.filter(u => {
         const fill = u.fillLevel || 0;
-        // Logic: Visit if Confirmed or (Not Checked + > Threshold)
         return u.isActiveToday === true || (u.isActiveToday === null && fill >= ECOROUTE_CONFIG.ACTIVE_THRESHOLD);
       });
 
@@ -541,7 +489,10 @@ const MapModule = (() => {
       // Build waypoints: depot → active users → dump yard
       const waypoints = [
         ECOROUTE_CONFIG.DEPOT,
-        ...usersToVisit.map(u => ({ lng: u.lng || u.location?.lng, lat: u.lat || u.location?.lat })),
+        ...usersToVisit.map(u => ({ 
+           lng: Number(u.lng || (u.location && u.location.lng)), 
+           lat: Number(u.lat || (u.location && u.location.lat)) 
+        })).filter(w => w.lat && w.lng),
         ECOROUTE_CONFIG.DUMP_YARD
       ];
 
