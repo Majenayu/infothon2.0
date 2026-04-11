@@ -100,7 +100,15 @@ const MapModule = (() => {
       const res = await fetch('/api/users/active', { headers });
       const usersToShow = res.ok ? await res.json() : MOCK_USERS; 
       
+      const currentRole = window.App ? App.getCurrentRole() : 'home';
+      const currentUser = window.App ? App.getCurrentUser() : null;
+
       usersToShow.forEach(user => {
+        // If not a driver, only show Community Points and the user themselves
+        if (currentRole !== 'driver' && user.role !== 'point' && (!currentUser || user.id !== currentUser.id)) {
+            return;
+        }
+
         const fill = user.fillLevel || 0;
         
         // Logical "Active" status:
@@ -651,7 +659,11 @@ const MapModule = (() => {
   function startTrackingPolling() {
     if (trackingInterval) clearInterval(trackingInterval);
     pollDriverLocation(); // Immediate fetch
-    trackingInterval = setInterval(pollDriverLocation, 5000); // 5 sec interval
+    addUserPins(); // Immediate fetch
+    trackingInterval = setInterval(() => {
+      pollDriverLocation();
+      addUserPins();
+    }, 5000); // 5 sec interval
   }
 
   function stopTrackingPolling() {
