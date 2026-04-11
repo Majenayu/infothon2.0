@@ -189,38 +189,67 @@
     let editingId = null;
 
     async function init() {
+      console.log('🚀 Initializing Mock Admin Dashboard...');
+      
       // 1. Fetch Config
       try {
         const cfg = await ApiModule.getConfig();
-        if (cfg.MAPBOX_TOKEN) ECOROUTE_CONFIG.MAPBOX_TOKEN = cfg.MAPBOX_TOKEN;
-      } catch(e) {}
+        console.log('📦 Config fetched:', cfg);
+        if (cfg.MAPBOX_TOKEN) {
+          ECOROUTE_CONFIG.MAPBOX_TOKEN = cfg.MAPBOX_TOKEN;
+        }
+      } catch(e) {
+        console.warn('⚠️ Could not fetch config from server, using local defaults.', e);
+      }
 
       // 2. Load Map
-      mapboxgl.accessToken = ECOROUTE_CONFIG.MAPBOX_TOKEN;
-      map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/dark-v11',
-        center: ECOROUTE_CONFIG.DEFAULT_CENTER,
-        zoom: 14
-      });
+      try {
+        if (!ECOROUTE_CONFIG.MAPBOX_TOKEN || ECOROUTE_CONFIG.MAPBOX_TOKEN.includes('YOUR_')) {
+          console.error('❌ Mapbox token is missing or invalid!');
+          showToast('Mapbox token is missing!', 'red');
+        }
+        
+        mapboxgl.accessToken = ECOROUTE_CONFIG.MAPBOX_TOKEN;
+        map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/mapbox/dark-v11',
+          center: ECOROUTE_CONFIG.DEFAULT_CENTER,
+          zoom: 14
+        });
 
-      map.on('click', (e) => {
-        const { lng, lat } = e.lngLat;
-        updateFormCoords(lat, lng);
-        setTempMarker(lat, lng);
-      });
+        map.on('load', () => console.log('🗺️ Map loaded successfully'));
+        
+        map.on('click', (e) => {
+          const { lng, lat } = e.lngLat;
+          updateFormCoords(lat, lng);
+          setTempMarker(lat, lng);
+        });
+      } catch(e) {
+        console.error('❌ Map error:', e);
+      }
 
       // 3. Load Mocks
       loadMocks();
     }
 
     async function loadMocks() {
+      console.log('📡 Fetching mocks from server...');
       try {
-        mocks = await ApiModule.getAdminMocks();
-        renderList();
-        renderMarkers();
+        const res = await ApiModule.getAdminMocks();
+        console.log('✅ Mocks received:', res);
+        mocks = res || [];
+        
+        if (mocks.length === 0) {
+          console.warn('⚠️ No mocks found in the database.');
+          document.getElementById('list-container').innerHTML = '<div style="color:#A3A3A3; padding:20px; text-align:center;">No mock users found in database. Check the server seeding logic.</div>';
+        } else {
+          renderList();
+          renderMarkers();
+        }
       } catch(e) {
-        showToast('Error loading mocks', 'red');
+        console.error('❌ Error fetching mocks:', e);
+        showToast('Error loading mocks from server', 'red');
+        document.getElementById('list-container').innerHTML = `<div style="color:#EF4444; padding:20px; text-align:center;">Failed to connect to server: ${e.message}</div>`;
       }
     }
 
@@ -352,7 +381,13 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    init();
+    window.onload = () => {
+      console.log('✅ Window loaded, starting init');
+      init().catch(err => {
+        console.error('🔥 CRITICAL INIT ERROR:', err);
+        showToast('Dashboard failed to initialize!', 'red');
+      });
+    };
   </script>
 </body>
 </html>

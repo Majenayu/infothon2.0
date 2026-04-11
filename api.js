@@ -178,12 +178,14 @@ const ApiModule = (() => {
   return {
     register, login, driverLogin, logout,
     getMe, updateMe,
-    hasSession, getToken,
+    hasSession, getToken, getConfig,
     getBlockStatus, blockLocationUpdates, unblockLocationUpdates,
     setDriverOnline, getDriverLocation,
     confirmPickup, getCollectionLog, addCollectionLog,
+    getLatestNotifications,
+    getAdminMocks, createAdminMock, updateAdminMock, deleteAdminMock,
+    resetAllUserPreferences,
     verifyBin, triggerNotification, getDailySummary, getDriverHistory, submitDriverReport,
-    getActiveTrip, completeTrip, getConfig,
-    resetAllUserPreferences
+    getActiveTrip, completeTrip
   };
 })();

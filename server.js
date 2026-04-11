@@ -24,14 +24,21 @@ const PORT = process.env.PORT || 3000;
 // ── Middleware ───────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
+
+// Serve static files with proper rooting
+const publicPath = path.resolve(__dirname);
+app.use(express.static(publicPath));
+console.log(`📡 Serving static files from: ${publicPath}`);
 
 // ── MongoDB Connection ────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://majen:majen@majen.f3jgom3.mongodb.net/?appName=majen';
 
 if (MONGO_URI) {
   mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅ MongoDB connected'))
+    .then(() => {
+      console.log('✅ MongoDB connected');
+      seedMocks();
+    })
     .catch(err => console.error('❌ MongoDB error:', err.message));
 } else {
   console.warn('⚠️  MONGO_URI not set — running without database (demo mode).');
@@ -129,7 +136,7 @@ const mockUserSchema = new mongoose.Schema({
 }, { timestamps: true });
 const MockUser = mongoose.models.MockUser || mongoose.model('MockUser', mockUserSchema);
 
-// Seeding logic for Mock Users
+// Seeding logic for Mock Users and History
 async function seedMocks() {
   const count = await MockUser.countDocuments();
   if (count === 0) {
@@ -148,8 +155,47 @@ async function seedMocks() {
     ];
     await MockUser.insertMany(initialMocks);
   }
+
+  // Seed User Collection History (Real users & Mocks)
+  const logCount = await CollectionLog.countDocuments();
+  if (logCount === 0) {
+    console.log('🌱 Seeding sample collection logs...');
+    const sampleLogs = [];
+    const dateStrings = ['2026-04-10', '2026-04-09', '2026-04-08', '2026-04-07', '2026-04-06'];
+    
+    // Inject logs for initial users
+    const allUsers = await User.find({ role: 'home' });
+    allUsers.forEach(u => {
+      dateStrings.forEach((d, idx) => {
+        sampleLogs.push({
+          userId: u._id,
+          date: d,
+          status: idx % 3 === 0 ? 'missed' : 'collected',
+          points: idx % 3 === 0 ? 0 : 50
+        });
+      });
+    });
+    if (sampleLogs.length > 0) await CollectionLog.insertMany(sampleLogs);
+  }
+
+  // Seed Driver Daily Summaries
+  const summaryCount = await DriverDailySummary.countDocuments();
+  if (summaryCount === 0) {
+    const drivers = await User.find({ role: 'driver' });
+    if (drivers.length > 0) {
+      console.log('🌱 Seeding sample driver summaries...');
+      const sampleSummaries = drivers.map(d => ({
+        driverId: d._id,
+        date: '2026-04-10',
+        housePickups: 12,
+        communityVerifications: 4,
+        pointsDistributed: 800,
+        verifiedBins: []
+      }));
+      await DriverDailySummary.insertMany(sampleSummaries);
+    }
+  }
 }
-seedMocks();
 
 // Driver issue reports
 const driverReportSchema = new mongoose.Schema({
@@ -543,6 +589,9 @@ app.post('/api/driver/trigger-notification', requireAuth, requireDb, async (req,
       return res.status(403).json({ message: 'Only drivers can trigger notifications.' });
     }
 
+    // Fetch home users to notify (Fixed: Variable was undefined)
+    const homeUsers = await User.find({ role: 'home' });
+
     // Save to broadcast collection so all Home users see it
     await PublicNotification.create({
       title: '📢 Morning Pickup Alert',
@@ -574,14 +623,14 @@ app.get('/api/notifications/latest', requireAuth, requireDb, async (req, res) =>
 });
 
 // ── Admin: Mock Data Persistence ──────────────────────────────────
-app.get('/api/admin/mocks', async (req, res) => {
+app.get('/api/admin/mocks', requireDb, async (req, res) => {
   try {
     const mocks = await MockUser.find().sort({ createdAt: -1 });
     res.json(mocks);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-app.post('/api/admin/mocks', async (req, res) => {
+app.post('/api/admin/mocks', requireDb, async (req, res) => {
   try {
     const mock = new MockUser({
       ...req.body,
@@ -589,10 +638,13 @@ app.post('/api/admin/mocks', async (req, res) => {
     });
     await mock.save();
     res.status(201).json(mock);
-  } catch (err) { res.status(400).json({ message: err.message }); }
+  } catch (err) { 
+    console.error('Mock Save Error:', err);
+    res.status(400).json({ message: err.message }); 
+  }
 });
 
-app.patch('/api/admin/mocks/:id', async (req, res) => {
+app.patch('/api/admin/mocks/:id', requireDb, async (req, res) => {
   try {
     const mock = await MockUser.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
     if (!mock) return res.status(404).json({ message: 'Mock not found' });
@@ -600,7 +652,7 @@ app.patch('/api/admin/mocks/:id', async (req, res) => {
   } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
-app.delete('/api/admin/mocks/:id', async (req, res) => {
+app.delete('/api/admin/mocks/:id', requireDb, async (req, res) => {
   try {
     await MockUser.findOneAndDelete({ id: req.params.id });
     res.json({ message: 'Mock deleted' });
