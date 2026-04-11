@@ -313,12 +313,6 @@ const App = (() => {
         MapModule.startTrackingPolling();
       } else {
         MapModule.stopTrackingPolling();
-        // Ensure zone boundaries are always drawn when driver opens map
-        if (currentRole === 'driver' && mapInitialized) {
-          setTimeout(() => {
-            if (MapModule.refreshBoundaries) MapModule.refreshBoundaries();
-          }, 800);
-        }
       }
     } else {
       MapModule.stopTrackingPolling();
@@ -1567,14 +1561,8 @@ const App = (() => {
     // Feature 5: Trip completion summary
     handleTripComplete,
     // Expose for MapModule to call (Feature 3)
-    getUserLocation: () => user ? user.location : null,
-    getCurrentRole:  () => currentRole,
-    getAssignedAreas: () => {
-      if (user && user.assignedAreas && user.assignedAreas.length > 0) return user.assignedAreas;
-      if (user && user.empId === 'D001') return ['gokulam_north']; // Demo fallback
-      if (user && user.role === 'driver') return ['gokulam_north']; // Universal fallback for any demo driver
-      return [];
-    }
+    getUserLocation: () => user.location,
+    getCurrentRole:  () => currentRole
   };
 })();
 

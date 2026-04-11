@@ -73,11 +73,9 @@ const MapModule = (() => {
 
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
 
-    map.on('load', async () => {
-      await addUserPins();
+    map.on('load', () => {
+      addUserPins();
       addDepotPins();
-      // Explicit second call after 1.5s to handle async auth race on first load
-      setTimeout(drawDriverBoundaries, 1500);
     });
 
     return true;
@@ -201,37 +199,21 @@ const MapModule = (() => {
     await drawDriverBoundaries();
   }
 
-  // Zone polygons are aligned to the ACTUAL coordinates of seeded mock users.
-  // Each box is [lng_west, lat_south] → [lng_east, lat_south] → [lng_east, lat_north] → [lng_west, lat_north] → close
   const ZONE_POLYGONS = {
-    // gokulam_north  — users U001 (76.608,12.326), U005 (76.614,12.350)
-    'gokulam_north':    [[76.600, 12.318], [76.620, 12.318], [76.620, 12.358], [76.600, 12.358], [76.600, 12.318]],
-    // gokulam_south  — users U002 (76.623,12.344), U007 (76.643,12.309)
-    'gokulam_south':    [[76.618, 12.300], [76.650, 12.300], [76.650, 12.352], [76.618, 12.352], [76.618, 12.300]],
-    // gokulam_east   — users U003 (76.636,12.331), U008 (76.620,12.298)
-    'gokulam_east':     [[76.615, 12.290], [76.645, 12.290], [76.645, 12.340], [76.615, 12.340], [76.615, 12.290]],
-    // gokulam_west   — users U004 (76.650,12.319), U010 (76.639,12.294)
-    'gokulam_west':     [[76.630, 12.285], [76.660, 12.285], [76.660, 12.330], [76.630, 12.330], [76.630, 12.285]],
-    // jayalakshmipuram — users U006 (76.662,12.339), U009 (76.655,12.306)
-    'jayalakshmipuram': [[76.645, 12.295], [76.672, 12.295], [76.672, 12.350], [76.645, 12.350], [76.645, 12.295]]
+    'gokulam_north': [[76.600, 12.335], [76.620, 12.335], [76.620, 12.355], [76.600, 12.355], [76.600, 12.335]],
+    'gokulam_south': [[76.620, 12.335], [76.645, 12.335], [76.645, 12.355], [76.620, 12.355], [76.620, 12.335]],
+    'gokulam_east':  [[76.600, 12.315], [76.620, 12.315], [76.620, 12.335], [76.600, 12.335], [76.600, 12.315]],
+    'gokulam_west':  [[76.620, 12.315], [76.645, 12.315], [76.645, 12.335], [76.620, 12.335], [76.620, 12.315]],
+    'jayalakshmipuram': [[76.645, 12.315], [76.665, 12.315], [76.665, 12.355], [76.645, 12.355], [76.645, 12.315]]
   };
 
   async function drawDriverBoundaries() {
-    if (!window.App || App.getCurrentRole() !== 'driver') return;
+    if (!window.App || App.getCurrentRole() !== 'driver' || !window.ApiModule) return;
     try {
-      // Synchronous fallback so it draws instantly even if backend is slow
-      let areas = [];
-      if (typeof App.getAssignedAreas === 'function') {
-        areas = App.getAssignedAreas();
-      }
+      const response = await ApiModule.getMe();
+      if (!response.user || !response.user.assignedAreas) return;
       
-      if (!areas || areas.length === 0) {
-        if (!window.ApiModule) return;
-        const driverUser = await ApiModule.getMe();
-        if (driverUser && driverUser.assignedAreas) areas = driverUser.assignedAreas;
-      }
-      
-      if (!areas || areas.length === 0) return;
+      const areas = response.user.assignedAreas;
       const allZones = Object.keys(ZONE_POLYGONS);
       
       allZones.forEach(zone => {
@@ -261,20 +243,20 @@ const MapModule = (() => {
           }
         });
 
-        // Semi-transparent red fill — visible on satellite
+        // Add semi-transparent fill
         map.addLayer({
           'id': layerId,
           'type': 'fill',
           'source': sourceId,
-          'paint': { 'fill-color': '#FF0000', 'fill-opacity': 0.20 }
+          'paint': { 'fill-color': '#EF4444', 'fill-opacity': 0.08 }
         });
         
-        // Bold solid red outline
+        // Add robust bounding box outline
         map.addLayer({
           'id': outlineId,
           'type': 'line',
           'source': sourceId,
-          'paint': { 'line-color': '#FF3333', 'line-width': 4, 'line-opacity': 1.0 }
+          'paint': { 'line-color': '#EF4444', 'line-width': 2, 'line-dasharray': [4, 2] }
         });
       });
     } catch(err) { console.warn('Could not draw boundaries', err); }
@@ -501,7 +483,33 @@ const MapModule = (() => {
     step();
   }
 
-  // (Duplicate addUserPins removed — the correctly-authorized version at line 84 is used)
+  async function addUserPins() {
+    clearUserMarkers();
+    
+    try {
+      // 1. Fetch Real Active Users
+      const res = await fetch('/api/users/active');
+      const realUsers = res.ok ? await res.json() : [];
+      
+      // 2. Fetch Admin Mock Users (Persistence feature)
+      let mockList = [];
+      try {
+        const mockRes = await ApiModule.getAdminMocks();
+        mockList = mockRes || [];
+      } catch(e) { 
+        console.warn('Mocks fetch failed, using static fallback');
+        mockList = MOCK_USERS; 
+      }
+      
+      // Filter mocks that aren't already represented by real users
+      const mockFiltered = mockList.filter(mu => !realUsers.some(ru => ru.name === mu.name));
+      const combined = [...realUsers, ...mockFiltered];
+
+      combined.forEach(user => {
+        // ... logic to add markers ...
+      });
+    } catch(e) { console.error(e); }
+  }
 
   async function startCollectionRoute() {
     if (!map) return;
@@ -509,12 +517,8 @@ const MapModule = (() => {
     App.showToast('Fetching route...', 'info');
 
     try {
-      // 1. Fetch Unified Active Users (Real + DB Mocks) — pass token so server filters by zone
-      const routeHeaders = {};
-      if (window.ApiModule && ApiModule.getToken()) {
-        routeHeaders['Authorization'] = `Bearer ${ApiModule.getToken()}`;
-      }
-      const res = await fetch('/api/users/active', { headers: routeHeaders });
+      // 1. Fetch Unified Active Users (Real + DB Mocks)
+      const res = await fetch('/api/users/active');
       const usersToShow = res.ok ? await res.json() : [];
       
       const usersToVisit = usersToShow.filter(u => {
@@ -707,9 +711,6 @@ const MapModule = (() => {
     startTrackingPolling,
     stopTrackingPolling,
     toggleStyle,
-    // Expose so app.js can trigger redraw after login
-    refreshBoundaries: drawDriverBoundaries,
-    loadUsersAndRefresh: async () => { await addUserPins(); addDepotPins(); },
     // Feature 3 reset (called externally if needed)
     resetProximityAlert: () => { proximityNotifiedThisSession = false; }
   };
