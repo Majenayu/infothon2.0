@@ -190,6 +190,72 @@ const MapModule = (() => {
         userMarkers.push(marker);
       });
     }
+    
+    // Draw driver bounding areas visually
+    await drawDriverBoundaries();
+  }
+
+  const ZONE_POLYGONS = {
+    'gokulam_north': [[76.600, 12.335], [76.620, 12.335], [76.620, 12.355], [76.600, 12.355], [76.600, 12.335]],
+    'gokulam_south': [[76.620, 12.335], [76.645, 12.335], [76.645, 12.355], [76.620, 12.355], [76.620, 12.335]],
+    'gokulam_east':  [[76.600, 12.315], [76.620, 12.315], [76.620, 12.335], [76.600, 12.335], [76.600, 12.315]],
+    'gokulam_west':  [[76.620, 12.315], [76.645, 12.315], [76.645, 12.335], [76.620, 12.335], [76.620, 12.315]],
+    'jayalakshmipuram': [[76.645, 12.315], [76.665, 12.315], [76.665, 12.355], [76.645, 12.355], [76.645, 12.315]]
+  };
+
+  async function drawDriverBoundaries() {
+    if (!window.App || App.getCurrentRole() !== 'driver' || !window.ApiModule) return;
+    try {
+      const response = await ApiModule.getMe();
+      if (!response.user || !response.user.assignedAreas) return;
+      
+      const areas = response.user.assignedAreas;
+      const allZones = Object.keys(ZONE_POLYGONS);
+      
+      allZones.forEach(zone => {
+         const layerId = `zone-layer-${zone}`;
+         const outlineId = `zone-outline-${zone}`;
+         const sourceId = `zone-source-${zone}`;
+         if (!areas.includes(zone)) {
+            if (map.getLayer(layerId)) map.removeLayer(layerId);
+            if (map.getLayer(outlineId)) map.removeLayer(outlineId);
+            if (map.getSource(sourceId)) map.removeSource(sourceId);
+         }
+      });
+      
+      areas.forEach((areaStr) => {
+        if (!ZONE_POLYGONS[areaStr]) return;
+        const sourceId = `zone-source-${areaStr}`;
+        const layerId = `zone-layer-${areaStr}`;
+        const outlineId = `zone-outline-${areaStr}`;
+        
+        if (map.getSource(sourceId)) return; // Already exists
+
+        map.addSource(sourceId, {
+          'type': 'geojson',
+          'data': {
+            'type': 'Feature',
+            'geometry': { 'type': 'Polygon', 'coordinates': [ZONE_POLYGONS[areaStr]] }
+          }
+        });
+
+        // Add semi-transparent fill
+        map.addLayer({
+          'id': layerId,
+          'type': 'fill',
+          'source': sourceId,
+          'paint': { 'fill-color': '#EF4444', 'fill-opacity': 0.08 }
+        });
+        
+        // Add robust bounding box outline
+        map.addLayer({
+          'id': outlineId,
+          'type': 'line',
+          'source': sourceId,
+          'paint': { 'line-color': '#EF4444', 'line-width': 2, 'line-dasharray': [4, 2] }
+        });
+      });
+    } catch(err) { console.warn('Could not draw boundaries', err); }
   }
 
   function addDepotPins() {
