@@ -127,26 +127,26 @@
 <div id="bin-verify-modal" class="modal">
   <div class="modal-handle"></div>
   <div class="modal-header">
-    <span class="modal-title">🗑️ Bin Checkpoint</span>
+    <span class="modal-title" data-i18n="bin_checkpoint_title">🗑️ Bin Checkpoint</span>
     <button class="modal-close-btn" onclick="App.skipBinVerify()">✕</button>
   </div>
   <div class="modal-body">
     <div id="bin-verify-user-name" style="font-size:1rem;font-weight:700;margin-bottom:4px;"></div>
     <div id="bin-verify-user-addr" style="font-size:0.8rem;color:var(--text2);margin-bottom:20px;"></div>
-    <div style="font-size:0.95rem;font-weight:600;margin-bottom:16px;color:var(--text1);">Was there waste / dust at this collection point?</div>
+    <div style="font-size:0.95rem;font-weight:600;margin-bottom:16px;color:var(--text1);" data-i18n="waste_question">Was there waste / dust at this collection point?</div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button class="btn btn-primary btn-full" id="bin-verify-yes-btn"
         style="background:var(--green);border-color:var(--green);"
-        onclick="App.verifyBin(true)">
+        onclick="App.verifyBin(true)" data-i18n="waste_yes_btn">
         ✅ Yes — Waste was collected
       </button>
       <button class="btn btn-secondary btn-full" id="bin-verify-no-btn"
         style="border-color:var(--red);color:var(--red);"
-        onclick="App.verifyBin(false)">
+        onclick="App.verifyBin(false)" data-i18n="waste_no_btn">
         ❌ No — Bin was empty
       </button>
     </div>
-    <div style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:14px;">User earns 10 pts if you confirm waste was collected</div>
+    <div style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:14px;" data-i18n="pts_info">User earns 10 pts if you confirm waste was collected</div>
   </div>
 </div>
 
@@ -154,25 +154,25 @@
 <div id="issue-report-modal" class="modal">
   <div class="modal-handle"></div>
   <div class="modal-header">
-    <span class="modal-title">🚩 Report Issue</span>
+    <span class="modal-title" data-i18n="report_issue_title">🚩 Report Issue</span>
     <button class="modal-close-btn" onclick="App.closeModal()">✕</button>
   </div>
   <div class="modal-body">
-    <div style="font-size:0.85rem;color:var(--text2);margin-bottom:12px;">Help us keep the route efficient by reporting obstacles or bin issues.</div>
+    <div style="font-size:0.85rem;color:var(--text2);margin-bottom:12px;" data-i18n="report_help_text">Help us keep the route efficient by reporting obstacles or bin issues.</div>
     
-    <label style="font-size:0.75rem;color:var(--text3);margin-bottom:6px;display:block;">Issue Type</label>
+    <label style="font-size:0.75rem;color:var(--text3);margin-bottom:6px;display:block;" data-i18n="issue_type_label">Issue Type</label>
     <select id="report-issue-type" class="btn btn-secondary btn-full" style="text-align:left;height:46px;margin-bottom:16px;appearance:auto;padding-right:12px;">
-      <option value="bin_issue">🗑️ Bin Overflow / Damaged</option>
-      <option value="road_issue">🚧 Road Block / Construction</option>
-      <option value="user_complaint">👤 User Complaint / Issue</option>
-      <option value="other">❓ Other</option>
+      <option value="bin_issue" data-i18n="bin_issue_opt">🗑️ Bin Overflow / Damaged</option>
+      <option value="road_issue" data-i18n="road_issue_opt">🚧 Road Block / Construction</option>
+      <option value="user_complaint" data-i18n="user_complaint_opt">👤 User Complaint / Issue</option>
+      <option value="other" data-i18n="other_issue_opt">❓ Other</option>
     </select>
 
-    <label style="font-size:0.75rem;color:var(--text3);margin-bottom:6px;display:block;">Description</label>
-    <textarea id="report-issue-desc" placeholder="Briefly describe the issue..." 
+    <label style="font-size:0.75rem;color:var(--text3);margin-bottom:6px;display:block;" data-i18n="description_label">Description</label>
+    <textarea id="report-issue-desc" placeholder="Briefly describe the issue..." data-i18n="describe_issue"
       style="width:100%;height:100px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;color:var(--text1);padding:12px;font-size:0.9rem;margin-bottom:20px;resize:none;"></textarea>
 
-    <button class="btn btn-primary btn-full" onclick="App.submitDriverReport()">
+    <button class="btn btn-primary btn-full" onclick="App.submitDriverReport()" data-i18n="submit_report_btn">
       Submit Report
     </button>
   </div>
@@ -182,32 +182,32 @@
 <div id="trip-summary-modal" class="modal">
   <div class="modal-handle"></div>
   <div class="modal-header">
-    <span class="modal-title">🏁 Trip Complete!</span>
+    <span class="modal-title" data-i18n="trip_complete_title">🏁 Trip Complete!</span>
     <button class="modal-close-btn" onclick="App.closeModal()">✕</button>
   </div>
   <div class="modal-body">
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-size:3rem;margin-bottom:10px;">📊</div>
-      <div style="font-size:1.1rem;font-weight:700;">Great job today!</div>
-      <div style="font-size:0.8rem;color:var(--text3);">Here is your collection summary</div>
+      <div style="font-size:1.1rem;font-weight:700;" data-i18n="great_job_msg">Great job today!</div>
+      <div style="font-size:0.8rem;color:var(--text3);" data-i18n="collection_summary_msg">Here is your collection summary</div>
     </div>
 
     <div class="driver-stats-row" style="margin-bottom:24px;">
       <div class="driver-stat">
         <div class="driver-stat-val" id="summary-pickups">0</div>
-        <div class="driver-stat-lbl">Pickups</div>
+        <div class="driver-stat-lbl" data-i18n="pickups_label">Pickups</div>
       </div>
       <div class="driver-stat">
         <div class="driver-stat-val" id="summary-points">0</div>
-        <div class="driver-stat-lbl">Pts Given</div>
+        <div class="driver-stat-lbl" data-i18n="pts_given">Pts Given</div>
       </div>
       <div class="driver-stat">
         <div class="driver-stat-val">100%</div>
-        <div class="driver-stat-lbl">Efficiency</div>
+        <div class="driver-stat-lbl" data-i18n="efficiency_label">Efficiency</div>
       </div>
     </div>
 
-    <button class="btn btn-primary btn-full" onclick="App.closeModal()">
+    <button class="btn btn-primary btn-full" onclick="App.closeModal()" data-i18n="done_today_btn">
       Done for today
     </button>
   </div>

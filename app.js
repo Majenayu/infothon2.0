@@ -104,15 +104,15 @@ const App = (() => {
     if (role === 'home') {
       document.getElementById('user-email').value    = 'ayush@ecoroute.app';
       document.getElementById('user-password').value = 'demo123';
-      showToast('Home User demo filled', 'info');
+      showToast(I18n.t('demo_home_filled'), 'info');
     } else if (role === 'point') {
       document.getElementById('user-email').value    = 'community@ecoroute.app';
       document.getElementById('user-password').value = 'demo123';
-      showToast('Point User demo filled', 'info');
+      showToast(I18n.t('demo_point_filled'), 'info');
     } else if (role === 'driver') {
       document.getElementById('driver-empid').value = 'D001';
       document.getElementById('driver-pin').value   = '1234';
-      showToast('Gokulam North Driver demo filled', 'info');
+      showToast(I18n.t('demo_driver_filled'), 'info');
     }
   }
 
@@ -136,16 +136,16 @@ const App = (() => {
     const btn      = document.getElementById('user-signup-btn');
 
     if (!name || !email || !password) {
-      showToast('Please fill in all fields', 'error'); return;
+      showToast(I18n.t('fill_all_fields'), 'error'); return;
     }
     if (password.length < 6) {
-      showToast('Password must be at least 6 characters', 'error'); return;
+      showToast(I18n.t('pw_min_6'), 'error'); return;
     }
     if (password !== confirm) {
-      showToast('Passwords do not match', 'error'); return;
+      showToast(I18n.t('pw_mismatch'), 'error'); return;
     }
 
-    btn.textContent = 'Creating account…';
+    btn.textContent = I18n.t('creating_account_btn');
     btn.disabled    = true;
 
     try {
@@ -171,7 +171,7 @@ const App = (() => {
         showToast(err.message, 'error');
       }
     } finally {
-      btn.textContent = 'Create Account';
+      btn.textContent = I18n.t('create_account');
       btn.disabled    = false;
     }
   }
@@ -185,10 +185,10 @@ const App = (() => {
     const btn      = document.getElementById('user-login-btn');
 
     if (!email || !password) {
-      showToast('Please enter email and password', 'error'); return;
+      showToast(I18n.t('login_fields_req'), 'error'); return;
     }
 
-    btn.textContent = 'Signing in…';
+    btn.textContent = I18n.t('signing_in_btn');
     btn.disabled    = true;
 
     try {
@@ -209,7 +209,7 @@ const App = (() => {
         showToast(err.message, 'error');
       }
     } finally {
-      btn.textContent = 'Sign In';
+      btn.textContent = I18n.t('sign_in');
       btn.disabled    = false;
     }
   }
@@ -223,10 +223,10 @@ const App = (() => {
     const btn   = document.getElementById('driver-login-btn');
 
     if (!empid || !pin) {
-      showToast('Enter Employee ID and PIN', 'error'); return;
+      showToast(I18n.t('driver_login_fields'), 'error'); return;
     }
 
-    btn.textContent = 'Verifying…';
+    btn.textContent = I18n.t('verifying_btn');
     btn.disabled    = true;
 
     try {
@@ -243,7 +243,7 @@ const App = (() => {
         showToast(err.message, 'error');
       }
     } finally {
-      btn.textContent = 'Access Driver Dashboard';
+      btn.textContent = I18n.t('access_driver_dashboard');
       btn.disabled    = false;
     }
   }
@@ -272,7 +272,8 @@ const App = (() => {
     // Show PWA install popup after 4s if prompt is ready
     setTimeout(showPWAPopup, 4000);
 
-    showToast(`Welcome back, ${user.nickname || user.name.split(' ')[0]}! 👋`, 'success');
+    const nickname = user.nickname || (user.name ? user.name.split(' ')[0] : 'User');
+    showToast(I18n.t('welcome_user', { name: nickname }), 'success');
   }
 
   // ════════════════════════════════════════════════════════
@@ -294,7 +295,7 @@ const App = (() => {
     document.getElementById('screen-login').classList.add('active');
     switchLoginTab('user');
     showSigninView();
-    showToast('Signed out', 'info');
+    showToast(I18n.t('signed_out'), 'info');
   }
 
   // ════════════════════════════════════════════════════════
@@ -352,7 +353,7 @@ const App = (() => {
       if (driverPane)   driverPane.style.display   = 'block';
       if (routeBtn)     routeBtn.style.display     = 'flex';
       if (overloadBtn)  overloadBtn.style.display    = 'block';
-      if (mapLabel)     mapLabel.textContent       = 'Driver View';
+      if (mapLabel)     mapLabel.textContent       = I18n.t('driver_view');
     } else {
       if (statusBanner) statusBanner.style.display = 'flex';
       if (statsRow)     statsRow.style.display     = 'flex';
@@ -361,7 +362,7 @@ const App = (() => {
       if (driverPane)   driverPane.style.display   = 'none';
       if (routeBtn)     routeBtn.style.display     = 'none';
       if (overloadBtn)  overloadBtn.style.display    = 'none';
-      if (mapLabel)     mapLabel.textContent       = 'Community Map';
+      if (mapLabel)     mapLabel.textContent       = I18n.t('community_map');
     }
   }
 
@@ -370,8 +371,9 @@ const App = (() => {
   // ════════════════════════════════════════════════════════
   function renderHome() {
     document.getElementById('greeting-text').textContent = getGreeting();
+    const nickname = user.nickname || (user.name ? user.name.split(' ')[0] : 'User');
     document.getElementById('greeting-name').innerHTML =
-      `${user.nickname || user.name.split(' ')[0]} <span>✨</span>`;
+      `${nickname} <span>✨</span>`;
 
     document.getElementById('stat-next-pickup').textContent  = user.nextPickup || 'Today 10:30';
     document.getElementById('stat-collections').textContent  = user.collectionsThisMonth || 0;
@@ -412,22 +414,22 @@ const App = (() => {
       }
     } else {
       // Home user (default)
-      const addr = user.address || 'Tap to set your location';
-      if (area) area.innerHTML = `
+      const addr = user.address || I18n.t('set_location_first');
+      area.innerHTML = `
         <div class="home-hero-card card-home" onclick="App.navigate('confirm')">
           <div class="home-hero-icon">🏠</div>
           <div class="home-hero-body">
-            <div class="home-hero-title">Direct House Collection</div>
+            <div class="home-hero-title">${I18n.t('direct_house_collection')}</div>
             <div class="home-hero-sub">${addr}</div>
-            <button class="home-hero-btn orange">Schedule Pickup</button>
+            <button class="home-hero-btn orange">${I18n.t('schedule_pickup')}</button>
           </div>
         </div>
         <div class="home-hero-card card-point" onclick="App.navigate('map')" style="margin-top:10px;">
           <div class="home-hero-icon">🗑️</div>
           <div class="home-hero-body">
-            <div class="home-hero-title">Nearby Collection Points</div>
-            <div class="home-hero-sub">3 public points nearby · Backup option</div>
-            <button class="home-hero-btn green" onclick="event.stopPropagation(); App.findNearestPoint();">Find Nearest</button>
+            <div class="home-hero-title">${I18n.t('nearby_collection_points')}</div>
+            <div class="home-hero-sub">${I18n.t('nearby_points_desc')}</div>
+            <button class="home-hero-btn green" onclick="event.stopPropagation(); App.findNearestPoint();">${I18n.t('find_nearest')}</button>
           </div>
         </div>
       `;
@@ -452,8 +454,8 @@ const App = (() => {
         return { ...b, distance: Math.round(dist) };
       }).sort((a, b) => a.distance - b.distance);
 
-      let title = isBlocked ? "Find a Community Point" : "Manage Community Bins";
-      let sub   = isBlocked ? "Your route is blocked. Use nearby bins." : "Select a bin to update its status";
+      let title = isBlocked ? I18n.t('find_community_point').replace('📍 ', '') : I18n.t('nearby_collection_points');
+      let sub   = isBlocked ? I18n.t('driver_locked_route') : I18n.t('bin_selected_msg');
 
       let html = `
         <div style="margin-bottom:16px;">
@@ -523,25 +525,25 @@ const App = (() => {
     if (user.isActiveToday === true) {
       banner.className  = 'status-banner status-active';
       icon.textContent  = '✅';
-      label.textContent = "You're Active Today!";
-      sub.textContent   = 'Bin confirmed for pickup.';
-      btn.textContent   = 'Done';
+      label.textContent = I18n.t('youre_active_today');
+      sub.textContent   = I18n.t('bin_confirmed');
+      btn.textContent   = I18n.t('done');
       btn.className     = 'status-confirm-btn done';
       btn.onclick       = null;
     } else if (user.isActiveToday === false) {
       banner.className  = 'status-banner status-inactive';
       icon.textContent  = '❌';
-      label.textContent = 'Not Available Today';
-      sub.textContent   = 'Bin will not be collected today.';
-      btn.textContent   = 'Change';
+      label.textContent = I18n.t('not_available_today');
+      sub.textContent   = I18n.t('bin_not_collected');
+      btn.textContent   = I18n.t('change');
       btn.className     = 'status-confirm-btn';
       btn.onclick       = () => navigate('confirm');
     } else {
       banner.className  = 'status-banner status-pending';
       icon.textContent  = '⏳';
-      label.textContent = "Confirm today's pickup";
-      sub.textContent   = 'Let us know your bin is ready.';
-      btn.textContent   = 'Confirm';
+      label.textContent = I18n.t('confirm_todays_pickup');
+      sub.textContent   = I18n.t('tap_to_confirm');
+      btn.textContent   = I18n.t('confirm');
       btn.className     = 'status-confirm-btn';
       btn.onclick       = () => navigate('confirm');
     }
@@ -613,7 +615,7 @@ const App = (() => {
   async function submitReport() {
     const val = parseInt(document.getElementById('fill-slider').value);
     const btn = document.getElementById('submit-report-btn');
-    if (btn) { btn.textContent = '⏳ Submitting...'; btn.disabled = true; }
+    if (btn) { btn.textContent = I18n.t('submitting_btn'); btn.disabled = true; }
 
     try {
       // If role is Point, we update the SELECTED bin, otherwise we update current user
@@ -625,12 +627,12 @@ const App = (() => {
         await ApiModule.updateMe({ fillLevel: val, targetId });
       }
       
-      showToast('🎉 Status updated! +10 points earned.', 'success');
+      showToast(I18n.t('status_updated'), 'success');
       if (currentRole === 'point') renderRoleHomeContent();
     } catch(e) {
-      showToast('Update failed. Check connection.', 'error');
+      showToast(I18n.t('update_failed'), 'error');
     } finally {
-      if (btn) { btn.textContent = 'SUBMIT REPORT'; btn.disabled = false; }
+      if (btn) { btn.textContent = I18n.t('submit_report'); btn.disabled = false; }
     }
   }
 
@@ -644,12 +646,12 @@ const App = (() => {
         <div style="display:flex;align-items:center;gap:12px;">
           <div class="home-hero-icon" style="font-size:2rem;">🚫</div>
           <div class="home-hero-body">
-            <div class="home-hero-title" style="color:var(--red);">You're Late!</div>
-            <div class="home-hero-sub">The driver has locked their route for today.</div>
+            <div class="home-hero-title" style="color:var(--red);">${I18n.t('youre_late')}</div>
+            <div class="home-hero-sub">${I18n.t('driver_locked_route')}</div>
           </div>
         </div>
         <button class="btn btn-secondary btn-full" onclick="App.navigate('map')" style="border-color:var(--red);color:var(--red);">
-          📍 Find Nearest Community Point instead
+          ${I18n.t('find_community_point')}
         </button>
       </div>
     `;
@@ -661,12 +663,12 @@ const App = (() => {
     
     if (isActive) {
       if (pill) {
-        pill.textContent = '⏳ Waiting for Location...';
+        pill.textContent = I18n.t('waiting_location');
         pill.style.color = '#FFA500';
       }
       
       if (!navigator.geolocation) {
-        showToast('Geolocation not supported.', 'error');
+        showToast(I18n.t('location_not_supported'), 'error');
         return;
       }
 
@@ -679,9 +681,9 @@ const App = (() => {
           if (!demoMode) {
             const res = await ApiModule.confirmPickup(lat, lng);
             if (res.blocked) {
-              showToast("Driver has already locked the route.", "error");
+              showToast(I18n.t('route_locked_msg'), "error");
               if (pill) {
-                pill.textContent = '🚫 Route Locked';
+                pill.textContent = '🚫 ' + I18n.t('route_locked_msg');
                 pill.style.color = 'var(--red)';
               }
               navigate('home');
@@ -699,25 +701,25 @@ const App = (() => {
           }
           
           if (pill) {
-            pill.textContent = '✅ Confirmed — Bin is Ready';
+            pill.textContent = '✅ ' + I18n.t('bin_confirmed');
             pill.style.color = 'var(--green)';
           }
-          showToast(`Confirmed! +${ECOROUTE_CONFIG.POINTS.CONFIRM_PICKUP} pts 🎉`, 'success');
+          showToast(I18n.t('confirmed_pts', { pts: ECOROUTE_CONFIG.POINTS.CONFIRM_PICKUP }), 'success');
           setTimeout(() => navigate('home'), 1200);
           
         } catch (err) {
           showToast(err.message || 'Server error', 'error');
         }
       }, (err) => {
-        showToast('Please enable location access to schedule pickup.', 'error');
+        showToast(I18n.t('location_error'), 'error');
       });
       
     } else {
       if (pill) {
-        pill.textContent = '❌ Marked as Not Available';
+        pill.textContent = '❌ ' + I18n.t('not_available_today');
         pill.style.color = 'var(--red)';
       }
-      showToast('Marked as not available. See you next time! 👋', 'info');
+      showToast(I18n.t('not_available_toast'), 'info');
       try {
         if (!demoMode) {
           await ApiModule.updateMe({ isActiveToday: false });
@@ -747,19 +749,19 @@ const App = (() => {
       const status = await ApiModule.getBlockStatus();
       if (status.isBlocked) {
         await ApiModule.unblockLocationUpdates();
-        btn.textContent = '🔒 Block User Pickup Requests';
+        btn.textContent = I18n.t('block_pickups');
         btn.style.background = '';
         btn.style.color = '#EF4444';
-        showToast('Users can now request pickups again.', 'success');
+        showToast(I18n.t('re_request_pickups_msg'), 'success');
       } else {
         await ApiModule.blockLocationUpdates();
-        btn.textContent = '🔓 Unblock Pickups';
+        btn.textContent = I18n.t('unblock_pickups');
         btn.style.background = '#EF4444';
         btn.style.color = '#FFF';
-        showToast('Pickup requests blocked. Users will be directed to community points.', 'info');
+        showToast(I18n.t('pickups_blocked_msg'), 'info');
       }
     } catch (err) {
-      showToast('Error syncing block status', 'error');
+      showToast(I18n.t('block_sync_err'), 'error');
     }
   }
 
@@ -771,22 +773,22 @@ const App = (() => {
       user.isOnline = false;
       if (!demoMode) await ApiModule.setDriverOnline(false, null).catch(()=>{});
       if (locationWatchId) navigator.geolocation.clearWatch(locationWatchId);
-      btn.textContent = '📍 Go Online (Share Location)';
+      btn.textContent = I18n.t('go_online');
       btn.style.background = '#22C55E';
-      showToast('You are now offline.', 'info');
+      showToast(I18n.t('offline_msg'), 'info');
     } else {
       if (!navigator.geolocation) {
-        showToast('Location not supported by device.', 'error');
+        showToast(I18n.t('not_supported_msg'), 'error');
         return;
       }
       user.isOnline = true;
-      btn.textContent = '🛑 Go Offline';
+      btn.textContent = I18n.t('go_offline');
       btn.style.background = '#EF4444';
       
       navigator.geolocation.getCurrentPosition(async (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         if (!demoMode) await ApiModule.setDriverOnline(true, loc).catch(()=>{});
-        showToast('You are now online. Sharing location...', 'success');
+        showToast(I18n.t('online_sharing_msg'), 'success');
         
         locationWatchId = navigator.geolocation.watchPosition(async (newPos) => {
           const newLoc = { lat: newPos.coords.latitude, lng: newPos.coords.longitude };
@@ -796,7 +798,7 @@ const App = (() => {
           checkBinProximity(newLoc);
         });
       }, err => {
-        showToast('Location permission needed to go online.', 'error');
+        showToast(I18n.t('permission_needed_msg'), 'error');
         user.isOnline = false;
         btn.textContent = '📍 Go Online (Share Location)';
         btn.style.background = '#22C55E';
@@ -856,14 +858,14 @@ const App = (() => {
         await ApiModule.verifyBin(id, name, hasDust);
       }
       if (hasDust) {
-        showToast(`✅ Verified! ${name}'s bin collected. +10 pts awarded. 🎉`, 'success');
+        showToast(I18n.t('bin_verified', { name }), 'success');
       } else {
-        showToast(`❌ Bin empty at ${name}'s location. No points awarded.`, 'info');
+        showToast(I18n.t('bin_empty_msg', { name }), 'info');
       }
       refreshDriverSummary();
       historyCache.summaries = null; // Invalidate cache
     } catch(e) {
-      showToast('Error submitting verification.', 'error');
+      showToast(I18n.t('verify_error'), 'error');
     }
   }
 
@@ -904,17 +906,17 @@ const App = (() => {
 
       // Fire a local browser notification as visual confirmation
       if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('📢 EcoRoute — Morning Pickup Alert', {
-          body: `Notification sent to ${count} home user${count !== 1 ? 's' : ''}. Bin confirmation window is open!`,
+        new Notification(I18n.t('notif_driver_nearby_title'), {
+          body: I18n.t('morning_alert_sent', { count }),
           icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚛</text></svg>'
         });
       }
 
-      showToast(`📢 Morning alert sent to ${count} H-Users!`, 'success');
+      showToast(I18n.t('morning_alert_sent', { count }), 'success');
     } catch(e) {
-      showToast('Could not send notification. Check connection.', 'error');
+      showToast(I18n.t('notif_error'), 'error');
     } finally {
-      if (btn) { btn.textContent = '📢 Send Morning Notification to H-Users'; btn.disabled = false; }
+      if (btn) { btn.textContent = I18n.t('send_morning_notif'); btn.disabled = false; }
     }
   }
 
@@ -926,23 +928,23 @@ const App = (() => {
   async function submitDriverReport() {
     const type = document.getElementById('report-issue-type').value;
     const desc = document.getElementById('report-issue-desc').value;
-    if (!desc) { showToast('Please enter a description.', 'error'); return; }
+    if (!desc) { showToast(I18n.t('enter_description'), 'error'); return; }
 
     try {
       if (!demoMode) {
         await ApiModule.submitDriverReport(type, desc, user.location);
       }
-      showToast('Issue reported successfully. 🚩', 'success');
+      showToast(I18n.t('issue_reported'), 'success');
       closeModal();
       document.getElementById('report-issue-desc').value = '';
     } catch (e) {
-      showToast('Error submitting report.', 'error');
+      showToast(I18n.t('report_error'), 'error');
     }
   }
 
   // ─ Feature 5: Trip Completion ───────────────────────────────
   async function handleTripComplete(tripId) {
-    showToast('🏆 Destination Reached! Trip Complete.', 'success');
+    showToast(I18n.t('destination_reached'), 'success');
     try {
       if (!demoMode && tripId) {
         await ApiModule.completeTrip(tripId);
@@ -992,9 +994,9 @@ const App = (() => {
     if (needsFetch) {
       // Show loading indicator
       if (filter === 'calendar' && grid) {
-        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--text3); font-size:0.85rem;">⏳ Loading history...</div>';
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--text3); font-size:0.85rem;">⏳ ${I18n.t('history_loading')}</div>`;
       } else if (filter !== 'calendar' && list) {
-        list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text3); font-size:0.85rem;">⏳ Loading collection list...</div>';
+        list.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text3); font-size:0.85rem;">⏳ ${I18n.t('history_loading')}</div>`;
       }
 
       try {
@@ -1007,7 +1009,7 @@ const App = (() => {
         }
       } catch(e) { 
         console.warn('History fetch fail', e); 
-        if (filter === 'calendar' && grid) grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--red);">Failed to load history tracking.</div>';
+        if (filter === 'calendar' && grid) grid.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--red);">${I18n.t('history_error')}</div>`;
         return;
       }
     }
@@ -1067,7 +1069,7 @@ const App = (() => {
 
       if (currentRole === 'driver') {
         if (!summaries || summaries.length === 0) {
-          list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No collection history recorded yet.</div>';
+          list.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">${I18n.t('no_history')}</div>`;
           return;
         }
 
@@ -1087,7 +1089,7 @@ const App = (() => {
                   </div>
                   <div>
                      <div style="font-size:1rem;font-weight:700;color:var(--orange);">${h.pointsDistributed || 0}</div>
-                     <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;">Pts Given</div>
+                     <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;">${I18n.t('pts_given')}</div>
                   </div>
                </div>
             </div>
@@ -1095,7 +1097,7 @@ const App = (() => {
         }).join('');
       } else {
         if (!logs || logs.length === 0) {
-          list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">No past collections found.</div>';
+          list.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.85rem;">${I18n.t('no_collection_found')}</div>`;
           return;
         }
 
@@ -1115,7 +1117,7 @@ const App = (() => {
               <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.75rem; color:var(--text3);">
                 <div style="display:flex; align-items:center; gap:6px;">
                   <div style="width:6px;height:6px;border-radius:50%;${dotStyle}"></div>
-                  Points Earned
+                  ${I18n.t('points_earned_label')}
                 </div>
                 <div style="color:var(--orange); font-weight:700;">+${l.points || 0}</div>
               </div>
@@ -1139,7 +1141,7 @@ const App = (() => {
         <div class="lb-item ${u.isMe ? 'me' : ''}">
           <span class="lb-rank ${rankColors[i]}">${u.rank}</span>
           <div class="lb-avatar">${rankEmojis[i]}</div>
-          <span class="lb-name">${u.name}${u.isMe ? ' (You)' : ''}</span>
+          <span class="lb-name">${u.name}${u.isMe ? ` (${I18n.t('you')})` : ''}</span>
           <span class="lb-pts">${u.points.toLocaleString()} pts</span>
         </div>`).join('');
     }
@@ -1190,18 +1192,18 @@ const App = (() => {
         <div class="redeem-modal-icon">${item.icon}</div>
         <div class="redeem-modal-name">${item.name}</div>
         <div class="redeem-modal-desc">${item.desc}</div>
-        <div class="redeem-modal-cost">🪙 ${item.cost} points required</div>
+        <div class="redeem-modal-cost">🪙 ${item.cost} ${I18n.t('points_required')}</div>
       </div>
       <div class="redeem-modal-actions">
         <div style="font-size:0.82rem;color:var(--text2);text-align:center;">
-          Balance: <strong style="color:var(--orange);">${(user.points||0).toLocaleString()} pts</strong>
-          ${(user.points||0) < item.cost ? ' — <span style="color:var(--red);">Insufficient</span>' : ''}
+          ${I18n.t('balance')}: <strong style="color:var(--orange);">${(user.points||0).toLocaleString()} pts</strong>
+          ${(user.points||0) < item.cost ? ` — <span style="color:var(--red);">${I18n.t('insufficient')}</span>` : ''}
         </div>
         <button class="btn btn-primary btn-full" onclick="App.confirmRedeem('${item.id}')"
           ${(user.points||0) < item.cost ? 'disabled style="opacity:0.5;"' : ''}>
-          Redeem Now
+          ${I18n.t('redeem_now')}
         </button>
-        <button class="btn btn-secondary btn-full" onclick="App.closeModal()">Maybe Later</button>
+        <button class="btn btn-secondary btn-full" onclick="App.closeModal()">${I18n.t('maybe_later')}</button>
       </div>`;
     openModal('redeem-modal');
   }
@@ -1212,7 +1214,7 @@ const App = (() => {
     user.points       -= item.cost;
     user.totalRedeemed = (user.totalRedeemed || 0) + 1;
     closeModal();
-    showToast(`🎉 ${item.name} redeemed! Check your email.`, 'success');
+    showToast(I18n.t('item_redeemed', { name: item.name }), 'success');
     renderLeaderboard(); renderProfile();
     if (!demoMode) ApiModule.updateMe({ points: user.points, totalRedeemed: user.totalRedeemed }).catch(() => {});
   }
@@ -1232,7 +1234,7 @@ const App = (() => {
     const phone    = document.getElementById('edit-phone').value.trim();
     const address  = document.getElementById('edit-address').value.trim();
 
-    if (!name) { showToast('Name cannot be empty', 'error'); return; }
+    if (!name) { showToast(I18n.t('name_empty_err'), 'error'); return; }
 
     user.name     = name;
     user.nickname = nickname || name.split(' ')[0];
@@ -1247,7 +1249,7 @@ const App = (() => {
 
     closeModal();
     renderProfile(); renderHome();
-    showToast('Profile updated! ✅', 'success');
+    showToast(I18n.t('profile_updated'), 'success');
   }
 
   // ── Notification modal ────────────────────────────────────
@@ -1383,14 +1385,18 @@ const App = (() => {
     closeLocationPicker();
     renderProfile();
     renderHome(); // update address in home hero card
-    showToast('Location saved! 📍', 'success');
+    showToast(I18n.t('location_saved'), 'success');
   }
 
   // ════════════════════════════════════════════════════════
   //  PROFILE
   // ════════════════════════════════════════════════════════
   function renderProfile() {
-    const roleLabels = { home: 'Home User', point: 'Point User', driver: 'Driver / Admin' };
+    const roleLabels = { 
+      home: I18n.t('home_user_label'), 
+      point: I18n.t('point_user_label'), 
+      driver: I18n.t('driver_mode').replace('🚛 ', '') 
+    };
     const el = id => document.getElementById(id);
     if (el('profile-name'))         el('profile-name').textContent         = user.name || '—';
     if (el('profile-phone'))        el('profile-phone').textContent        = user.phone || '—';
@@ -1408,12 +1414,12 @@ const App = (() => {
 
   // ─ Admin: Global Reset ──────────────────────────────────────
   async function resetAllUserPreferences() {
-    if (!confirm('Are you sure you want to reset all user preferences for today?')) return;
+    if (!confirm(I18n.t('reset_confirm'))) return;
     try {
       const res = await ApiModule.resetAllUserPreferences();
-      showToast(`✅ Global Reset Complete! (${res.modifiedCount} users reset)`, 'success');
+      showToast(I18n.t('reset_complete', { count: res.modifiedCount }), 'success');
     } catch (e) {
-      showToast('Error performing global reset.', 'error');
+      showToast(I18n.t('reset_error'), 'error');
     }
   }
 

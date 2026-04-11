@@ -72,11 +72,9 @@ const MapModule = (() => {
           background:#111;color:#A3A3A3;padding:40px;text-align:center;
         ">
           <div style="font-size:3rem;">🗺️</div>
-          <div style="font-family:'Syne',sans-serif;font-size:1.1rem;color:#F5F5F5;">Map Not Configured</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.1rem;color:#F5F5F5;">${I18n.t('map_not_configured')}</div>
           <div style="font-size:0.85rem;line-height:1.6;">
-            Open <code style="color:#FF6B00;background:#1A1A1A;padding:2px 6px;border-radius:4px;">public/js/config.js</code>
-            and replace <code style="color:#FF6B00;background:#1A1A1A;padding:2px 6px;border-radius:4px;">YOUR_MAPBOX_TOKEN_HERE</code>
-            with your Mapbox public token.
+            ${I18n.t('open_config_hint')}
           </div>
           <div style="font-size:0.78rem;color:#525252;">Get a free token at mapbox.com</div>
         </div>
@@ -115,7 +113,7 @@ const MapModule = (() => {
 
     // AGGRESSIVE OVERRIDE: If the UI says "Driver View", we are a driver.
     const mapLabel = document.getElementById('map-mode-label');
-    if (mapLabel && mapLabel.textContent.includes('Driver')) {
+    if (mapLabel && (mapLabel.textContent.includes('Driver') || (typeof I18n !== 'undefined' && mapLabel.textContent.includes(I18n.t('driver_view').replace('🚛 ', ''))))) {
        currentRole = 'driver';
     }
 
@@ -175,10 +173,10 @@ const MapModule = (() => {
       const popup = new mapboxgl.Popup({ offset: 30, closeButton: false, className: 'eco-popup' })
         .setHTML(`
           <div style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:12px;padding:12px 14px;min-width:180px;font-family:'DM Sans',sans-serif;">
-            <div style="font-weight:700;font-size:0.9rem;color:#F5F5F5;margin-bottom:4px;">${user.name} ${isBin ? '(Bin)' : '(House)'}</div>
+            <div style="font-weight:700;font-size:0.9rem;color:#F5F5F5;margin-bottom:4px;">${user.name} ${isBin ? '('+I18n.t('bin_label')+')' : '('+I18n.t('house_label')+')'}</div>
             <div style="font-size:0.75rem;color:#A3A3A3;margin-bottom:8px;">${user.address || 'Mysuru'}</div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-size:0.78rem;color:#A3A3A3;">Fill Level</span>
+              <span style="font-size:0.78rem;color:#A3A3A3;">${I18n.t('fill_level_label')}</span>
               <span style="font-size:1rem;font-weight:700;color:${isActiveReady ? '#22C55E' : '#EF4444'}">${fill}%</span>
             </div>
             <div style="height:6px;background:#222;border-radius:4px;margin-top:6px;overflow:hidden;">
@@ -200,7 +198,7 @@ const MapModule = (() => {
     const bCount = usersToShow.filter(u => (u.role || '').toLowerCase() === 'point' && !u.isHouse).length;
     const pill = document.getElementById('map-status-pill');
     if (pill) {
-      pill.innerHTML = `🏠 ${hCount} Houses | 🗑️ ${bCount} Bins ${isFallback ? '(Demo Mode)' : ''}`;
+      pill.innerHTML = `🏠 ${hCount} ${I18n.t('houses_count')} | 🗑️ ${bCount} ${I18n.t('bins_count')} ${isFallback ? I18n.t('demo_mode_label') : ''}`;
       pill.style.display = 'block';
     }
     
@@ -391,10 +389,10 @@ const MapModule = (() => {
       const loc = await ApiModule.getDriverLocation();
       if (loc && loc.available && loc.location && loc.location.lng) {
         if (!driverWasOnline) {
-          App.showToast('🚛 Driver is now Online! Tracking Live.', 'success');
+          App.showToast(I18n.t('driver_online_toast'), 'success');
           if ('Notification' in window && Notification.permission === 'granted') {
-             new Notification('EcoRoute - Driver Assigned', {
-               body: 'Your collection driver is on the route and heading to your area!'
+             new Notification(I18n.t('notif_driver_assigned_title'), {
+               body: I18n.t('notif_driver_assigned_body')
              });
           }
         }
@@ -423,7 +421,7 @@ const MapModule = (() => {
 
       } else {
         if (driverWasOnline) {
-          App.showToast('Driver has gone offline.', 'info');
+          App.showToast(I18n.t('driver_offline_toast'), 'info');
         }
         driverWasOnline = false;
         mapGeneratedForObserver = false; // Allow map to re-generate when driver comes back
@@ -499,10 +497,10 @@ const MapModule = (() => {
 
       if (distMeters <= 20) {
         proximityNotifiedThisSession = true;
-        App.showToast('🚛 Driver is 20m away! Get your bin ready 🗑️', 'success');
+        App.showToast(I18n.t('proximity_alert'), 'success');
         if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('🚛 EcoRoute — Driver Nearby!', {
-            body: 'Your collection driver is less than 20 meters away. Please keep your bin accessible.',
+          new Notification(I18n.t('notif_driver_nearby_title'), {
+            body: I18n.t('notif_driver_nearby_body'),
             icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚛</text></svg>'
           });
         }
@@ -551,7 +549,7 @@ const MapModule = (() => {
 
   async function startCollectionRoute() {
     if (!map) return;
-    App.showToast('Fetching route...', 'info');
+    App.showToast(I18n.t('fetching_route_msg'), 'info');
 
     let usersToShow = [];
     try {
@@ -573,7 +571,7 @@ const MapModule = (() => {
       });
 
       if (usersToVisit.length === 0) {
-        App.showToast('No active locations needing pickup today', 'info');
+        App.showToast(I18n.t('no_active_locations'), 'info');
         return;
       }
 
