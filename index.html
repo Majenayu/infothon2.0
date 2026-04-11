@@ -107,7 +107,7 @@
       <label class="input-label" data-i18n="address">Address</label>
       <input id="edit-address" class="modal-input" type="text" placeholder="Your pickup address (or use pin below)"/>
     </div>
-    <button class="btn btn-secondary btn-full" style="gap:8px;" onclick="App.openLocationPicker()">
+    <button class="btn btn-secondary btn-full" style="gap:8px;" onclick="App.openLocationPicker()" data-i18n="set_location_map">
       📍 Set Exact Location on Map
     </button>
     <button class="btn btn-primary btn-full mt-3" onclick="App.saveProfile()" data-i18n="save_changes">Save Changes</button>
@@ -155,7 +155,7 @@
     <div class="lp-address-label" data-i18n="delivery_location">Delivery Location</div>
     <div class="lp-address-value" id="lp-address-value" data-i18n="move_map_location">Move the map to set your location</div>
     <div class="lp-coords" id="lp-coords"></div>
-    <button class="btn btn-primary btn-full" onclick="App.confirmLocation()" style="margin-top:12px;">
+    <button class="btn btn-primary btn-full" onclick="App.confirmLocation()" style="margin-top:12px;" data-i18n="confirm_location">
       Confirm Location
     </button>
   </div>
@@ -227,19 +227,19 @@
         </div>
 
         <div class="signup-toggle-row">
-          New to EcoRoute?
-          <span class="signup-toggle-link" onclick="App.showSignupView()">Create Account →</span>
+          <span data-i18n="new_to_ecoroute">New to EcoRoute?</span>
+          <span class="signup-toggle-link" onclick="App.showSignupView()" data-i18n="create_account_link">Create Account →</span>
         </div>
       </form>
 
       <!-- Sign Up View -->
       <form id="signup-view" class="login-form" style="display:none;" onsubmit="return false;">
-        <div class="login-form-hint" style="color:var(--green);border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);">
+        <div class="login-form-hint" style="color:var(--green);border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);" data-i18n="create_account_title">
           🌱 Create your EcoRoute account
         </div>
 
         <div class="input-group">
-          <label class="input-label">Full Name</label>
+          <label class="input-label" data-i18n="full_name">Full Name</label>
           <div class="input-wrap">
             <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <input id="signup-name" class="form-input" type="text" placeholder="Your full name" autocomplete="name"/>
@@ -247,7 +247,7 @@
         </div>
 
         <div class="input-group">
-          <label class="input-label">Email Address</label>
+          <label class="input-label" data-i18n="email_label">Email Address</label>
           <div class="input-wrap">
             <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <input id="signup-email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email"/>
@@ -255,7 +255,7 @@
         </div>
 
         <div class="input-group">
-          <label class="input-label">Password</label>
+          <label class="input-label" data-i18n="password_label">Password</label>
           <div class="input-wrap">
             <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <input id="signup-password" class="form-input" type="password" placeholder="Min. 6 characters" autocomplete="new-password"/>
@@ -266,7 +266,7 @@
         </div>
 
         <div class="input-group">
-          <label class="input-label">Confirm Password</label>
+          <label class="input-label" data-i18n="confirm_password">Confirm Password</label>
           <div class="input-wrap">
             <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <input id="signup-confirm" class="form-input" type="password" placeholder="Re-enter password" autocomplete="new-password"/>
@@ -275,30 +275,30 @@
 
         <!-- Role selector -->
         <div class="input-group">
-          <label class="input-label">I am a…</label>
+          <label class="input-label" data-i18n="i_am_a">I am a…</label>
           <div class="role-selector-row">
             <label class="role-selector-option active" id="role-opt-home" onclick="App.selectSignupRole('home')">
               <input type="radio" name="signup-role" value="home" checked style="display:none;"/>
               <span class="role-opt-icon">🏠</span>
-              <span class="role-opt-label">Home User</span>
-              <span class="role-opt-desc">Direct pickup from my house</span>
+              <span class="role-opt-label" data-i18n="home_user_label">Home User</span>
+              <span class="role-opt-desc" data-i18n="home_user_desc">Direct pickup from my house</span>
             </label>
             <label class="role-selector-option" id="role-opt-point" onclick="App.selectSignupRole('point')">
               <input type="radio" name="signup-role" value="point" style="display:none;"/>
               <span class="role-opt-icon">🗑</span>
-              <span class="role-opt-label">Point User</span>
-              <span class="role-opt-desc">I use community collection points</span>
+              <span class="role-opt-label" data-i18n="point_user_label">Point User</span>
+              <span class="role-opt-desc" data-i18n="point_user_desc">I use community collection points</span>
             </label>
           </div>
         </div>
 
-        <button id="user-signup-btn" class="btn btn-primary btn-full login-btn" style="background:var(--green);" onclick="App.signUpUser()">
+        <button id="user-signup-btn" class="btn btn-primary btn-full login-btn" style="background:var(--green);" onclick="App.signUpUser()" data-i18n="create_account">
           Create Account
         </button>
 
         <div class="signup-toggle-row">
-          Already have an account?
-          <span class="signup-toggle-link" onclick="App.showSigninView()">Sign In →</span>
+          <span data-i18n="already_have_account">Already have an account?</span>
+          <span class="signup-toggle-link" onclick="App.showSigninView()" data-i18n="sign_in_link">Sign In →</span>
         </div>
       </form>
     </div>
@@ -310,7 +310,7 @@
       </div>
 
       <div class="input-group">
-        <label class="input-label">Employee ID</label>
+        <label class="input-label" data-i18n="employee_id">Employee ID</label>
         <div class="input-wrap">
           <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           <input id="driver-empid" class="form-input" type="text" placeholder="EMP-XXXXX" autocomplete="off" style="text-transform:uppercase;"/>
@@ -318,7 +318,7 @@
       </div>
 
       <div class="input-group">
-        <label class="input-label">PIN</label>
+        <label class="input-label" data-i18n="pin_label">PIN</label>
         <div class="input-wrap">
           <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           <input id="driver-pin" class="form-input" type="password" placeholder="••••" maxlength="6" autocomplete="off"/>
@@ -328,18 +328,18 @@
         </div>
       </div>
 
-      <button id="driver-login-btn" class="btn btn-driver btn-full login-btn" onclick="App.loginDriver()">
+      <button id="driver-login-btn" class="btn btn-driver btn-full login-btn" onclick="App.loginDriver()" data-i18n="access_driver_dashboard">
         Access Driver Dashboard
       </button>
 
       <div class="driver-admin-note">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Driver accounts are created by administrators. Contact your supervisor for access credentials.
+        <span data-i18n="driver_admin_note">Driver accounts are created by administrators. Contact your supervisor for access credentials.</span>
       </div>
 
-      <div class="login-divider"><span>Demo</span></div>
+      <div class="login-divider"><span data-i18n="demo">Demo</span></div>
       <div class="demo-accounts">
-        <div class="demo-chip driver-chip" onclick="App.fillDemo('driver')">🚛 Demo Driver</div>
+        <div class="demo-chip driver-chip" onclick="App.fillDemo('driver')" data-i18n="demo_driver">🚛 Demo Driver</div>
       </div>
     </form>
 
@@ -443,9 +443,9 @@
       <input type="range" id="fill-slider" min="0" max="100" value="85"
         style="width:100%;accent-color:#FF6B00;cursor:pointer;height:6px;"/>
       <div style="display:flex;justify-content:space-between;margin-top:4px;">
-        <span style="font-size:0.7rem;color:#525252;">Empty</span>
+        <span style="font-size:0.7rem;color:#525252;" data-i18n="empty">Empty</span>
         <span id="fill-slider-label" class="fill-high" style="font-size:0.85rem;font-weight:600;">85%</span>
-        <span style="font-size:0.7rem;color:#525252;">Full</span>
+        <span style="font-size:0.7rem;color:#525252;" data-i18n="full">Full</span>
       </div>
     </div>
 
@@ -457,12 +457,12 @@
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
-        <span>Tap to add bin photo</span>
-        <span style="font-size:0.72rem;color:#525252;">Optional — helps verify fill level</span>
+        <span data-i18n="tap_add_photo">Tap to add bin photo</span>
+        <span style="font-size:0.72rem;color:#525252;" data-i18n="optional_photo">Optional — helps verify fill level</span>
       </div>
       <div id="upload-preview" style="display:none;">
         <img id="bin-photo-img" src="" alt="Bin photo" style="width:100%;height:120px;object-fit:cover;border-radius:8px;"/>
-        <div class="upload-change-lbl">Tap to change photo</div>
+        <div class="upload-change-lbl" data-i18n="tap_change_photo">Tap to change photo</div>
       </div>
     </div>
 
@@ -470,10 +470,10 @@
 
     <button id="find-nearest-bin-btn" class="btn btn-secondary btn-full mt-2" 
             onclick="MapModule.routeToNearestPoint()" style="gap:8px; border-color:rgba(255,107,0,0.4); color:var(--orange);">
-      📍 FIND NEAREST COMMUNITY BIN
+      <span data-i18n="find_nearest_bin">📍 FIND NEAREST COMMUNITY BIN</span>
     </button>
 
-    <div style="font-size:0.78rem;color:#22C55E;text-align:center;">
+    <div style="font-size:0.78rem;color:#22C55E;text-align:center;" data-i18n="earn_points_report">
       Earn 100 points for every report – Thank you for sustainable action!
     </div>
   </div>
@@ -487,7 +487,7 @@
       <div class="driver-controls" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px;">
         <button id="driver-online-btn" class="btn btn-primary" style="background:#22C55E;border-color:#22C55E;" onclick="App.toggleDriverOnline()" data-i18n="go_online">📍 Go Online (Share Location)</button>
         <button id="driver-block-btn" class="btn btn-secondary" style="border-color:#EF4444;color:#EF4444;" onclick="App.toggleDriverBlock()" data-i18n="block_pickups">🔒 Block User Pickup Requests</button>
-        <button id="overload-btn" class="btn" style="display:none; background:rgba(239,68,68,0.1); border:1px solid #EF4444; color:#EF4444; font-weight:700; border-radius:12px; padding:14px; transition:all 0.2s;" onclick="OverloadModule.declare()">
+        <button id="overload-btn" class="btn" style="display:none; background:rgba(239,68,68,0.1); border:1px solid #EF4444; color:#EF4444; font-weight:700; border-radius:12px; padding:14px; transition:all 0.2s;" onclick="OverloadModule.declare()" data-i18n="declare_overload">
           🚨 Declare Area Overload
         </button>
       </div>
@@ -506,7 +506,7 @@
           <div class="driver-stat-lbl" data-i18n="distance">Distance</div>
         </div>
       </div>
-      <button class="btn btn-primary btn-full mt-3" onclick="App.navigate('map');">
+      <button class="btn btn-primary btn-full mt-3" onclick="App.navigate('map');" data-i18n="open_route_map">
         🗺 Open Route Map
       </button>
     </div>
@@ -525,13 +525,13 @@
       <path d="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/>
       <path d="m21 21-4.35-4.35"/>
     </svg>
-    Show Route Details
+    <span data-i18n="show_route_details">Show Route Details</span>
   </button>
 
   <div class="map-overlay-top">
     <div style="display:flex;flex-direction:column;">
-      <span style="font-size:0.68rem;color:#A3A3A3;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Live View</span>
-      <span class="map-title" id="map-mode-label">Community Map</span>
+      <span style="font-size:0.68rem;color:#A3A3A3;font-weight:600;text-transform:uppercase;letter-spacing:.06em;" data-i18n="live_view">Live View</span>
+      <span class="map-title" id="map-mode-label" data-i18n="community_map">Community Map</span>
     </div>
     <div style="display:flex;gap:8px;">
       <div class="fab-btn" title="Re-center" onclick="MapModule.recenter()" style="position:static;">
@@ -554,18 +554,18 @@
   <div class="map-legend">
     <div class="legend-item">
       <div class="legend-dot" style="background:#22C55E;"></div>
-      <span>≥70% Full (Active)</span>
+      <span data-i18n="active_legend">≥70% Full (Active)</span>
     </div>
     <div class="legend-item">
       <div class="legend-dot" style="background:#EF4444;"></div>
-      <span>&lt;70% (Inactive)</span>
+      <span data-i18n="inactive_legend">&lt;70% (Inactive)</span>
     </div>
   </div>
 
   <div class="eta-card" id="eta-card">
-    <div class="eta-label">Arriving in</div>
+    <div class="eta-label" data-i18n="arriving_in">Arriving in</div>
     <div class="eta-mins" id="eta-mins">— mins</div>
-    <div class="eta-orange">ETA</div>
+    <div class="eta-orange" data-i18n="eta">ETA</div>
   </div>
 
   <div class="map-fab" style="bottom:240px;">
@@ -575,7 +575,7 @@
 
 
 
-  <button id="route-start-btn" class="btn btn-primary route-start-btn" style="display:none;">
+  <button id="route-start-btn" class="btn btn-primary route-start-btn" style="display:none;" data-i18n="start_collection_route">
     🚛 Start Collection Route
   </button>
 
@@ -586,12 +586,12 @@
         <div class="sheet-driver-avatar">🚛</div>
         <div>
           <div class="sheet-driver-name">Rahul · 4.9 ⭐</div>
-          <div class="sheet-driver-sub">On the way</div>
+          <div class="sheet-driver-sub" data-i18n="on_the_way">On the way</div>
         </div>
       </div>
-      <div class="section-title" style="margin-bottom:10px;">Remaining Stops</div>
+      <div class="section-title" style="margin-bottom:10px;" data-i18n="remaining_stops">Remaining Stops</div>
       <div class="sheet-stops" id="route-stops">
-        <div style="color:#525252;font-size:0.85rem;text-align:center;padding:20px;">Start the route to see stops</div>
+        <div style="color:#525252;font-size:0.85rem;text-align:center;padding:20px;" data-i18n="start_route_to_see">Start the route to see stops</div>
       </div>
     </div>
   </div>
@@ -615,15 +615,15 @@
     </div>
     <div id="calendar-grid" class="calendar-grid"></div>
     <div class="calendar-legend" style="display:flex;gap:12px;justify-content:center;margin-top:16px;font-size:0.75rem;color:var(--text2);">
-      <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:50%;background:var(--green);"></div> Collected</div>
-      <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:50%;background:var(--red);"></div> Missed</div>
+      <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:50%;background:var(--green);"></div> <span data-i18n="collected">Collected</span></div>
+      <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:50%;background:var(--red);"></div> <span data-i18n="missed">Missed</span></div>
     </div>
   </div>
 
   <div id="view-list" style="display:none;">
     <div class="monthly-summary mt-3">
       <div class="monthly-summary-header">
-        <span>April Summary</span>
+        <span data-i18n="april_summary">April Summary</span>
       </div>
       <div class="monthly-bar-row">
         <div class="monthly-bar-fill" id="history-bar-fill" style="width:0%;"></div>
@@ -645,7 +645,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div class="points-hero-val" id="lb-my-points">0 Points</div>
-        <div class="points-hero-lbl">Your eco score this month</div>
+        <div class="points-hero-lbl" data-i18n="your_eco_score">Your eco score this month</div>
       </div>
       <div style="font-size:2.2rem;">🪙</div>
     </div>
@@ -654,27 +654,27 @@
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:6px;">
       <span style="font-size:0.72rem;color:#525252;" id="lb-pts-current">0 pts</span>
-      <span style="font-size:0.72rem;color:#525252;">Next: 4,000 pts → Gold 🥇</span>
+      <span style="font-size:0.72rem;color:#525252;" data-i18n="next_gold">Next: 4,000 pts → Gold 🥇</span>
     </div>
   </div>
   <div class="section-header mt-3">
-    <span class="section-title">🏆 Leaderboard</span>
+    <span class="section-title" data-i18n="leaderboard">🏆 Leaderboard</span>
     <span class="section-link">April 2026</span>
   </div>
   <div class="leaderboard-list" id="lb-list"></div>
   <div class="section-header mt-4">
-    <span class="section-title">Your Badges</span>
+    <span class="section-title" data-i18n="your_badges">Your Badges</span>
   </div>
   <div class="badges-row">
-    <div class="badge-card unlocked"><div class="badge-icon">🏅</div><div class="badge-name">Eco Warrior</div><div class="badge-unlocked-tag">UNLOCKED</div></div>
-    <div class="badge-card"><div class="badge-icon">🛡️</div><div class="badge-name">Route Reporter</div><div class="badge-name" style="color:#525252;font-size:0.62rem;">Locked</div></div>
-    <div class="badge-card unlocked"><div class="badge-icon">🌿</div><div class="badge-name">Green Star</div><div class="badge-unlocked-tag">UNLOCKED</div></div>
-    <div class="badge-card"><div class="badge-icon">⚡</div><div class="badge-name">Speed Sorter</div><div class="badge-name" style="color:#525252;font-size:0.62rem;">Locked</div></div>
-    <div class="badge-card"><div class="badge-icon">🌍</div><div class="badge-name">City Hero</div><div class="badge-name" style="color:#525252;font-size:0.62rem;">Locked</div></div>
+    <div class="badge-card unlocked"><div class="badge-icon">🏅</div><div class="badge-name" data-i18n="eco_warrior">Eco Warrior</div><div class="badge-unlocked-tag" data-i18n="unlocked">UNLOCKED</div></div>
+    <div class="badge-card"><div class="badge-icon">🛡️</div><div class="badge-name" data-i18n="route_reporter">Route Reporter</div><div class="badge-name" style="color:#525252;font-size:0.62rem;" data-i18n="locked">Locked</div></div>
+    <div class="badge-card unlocked"><div class="badge-icon">🌿</div><div class="badge-name" data-i18n="green_star">Green Star</div><div class="badge-unlocked-tag" data-i18n="unlocked">UNLOCKED</div></div>
+    <div class="badge-card"><div class="badge-icon">⚡</div><div class="badge-name" data-i18n="speed_sorter">Speed Sorter</div><div class="badge-name" style="color:#525252;font-size:0.62rem;" data-i18n="locked">Locked</div></div>
+    <div class="badge-card"><div class="badge-icon">🌍</div><div class="badge-name" data-i18n="city_hero">City Hero</div><div class="badge-name" style="color:#525252;font-size:0.62rem;" data-i18n="locked">Locked</div></div>
   </div>
   <div class="section-header mt-4">
-    <span class="section-title">Redeem Rewards</span>
-    <span class="section-link">See All</span>
+    <span class="section-title" data-i18n="redeem_rewards">Redeem Rewards</span>
+    <span class="section-link" data-i18n="see_all">See All</span>
   </div>
   <div class="redeem-row" id="redeem-row"></div>
   <div style="height:16px;"></div>
@@ -686,23 +686,23 @@
 <section id="screen-chat" class="screen" style="padding-bottom:0;">
   <div style="padding:20px 20px 12px;">
     <div class="font-display" style="font-size:1.2rem;font-weight:700;" data-i18n="waste_assistant">Waste Assistant</div>
-    <div style="font-size:0.8rem;color:#A3A3A3;margin-top:2px;">AI-powered waste classification</div>
+    <div style="font-size:0.8rem;color:#A3A3A3;margin-top:2px;" data-i18n="ai_waste_classification">AI-powered waste classification</div>
   </div>
   <div class="chat-placeholder">
     <div class="chat-placeholder-icon">🤖</div>
-    <div class="chat-placeholder-title">AI Model Coming Soon</div>
-    <div class="chat-placeholder-desc">
+    <div class="chat-placeholder-title" data-i18n="ai_coming_soon">AI Model Coming Soon</div>
+    <div class="chat-placeholder-desc" data-i18n="ai_coming_desc">
       Our intelligent waste classification assistant is being trained and will be available shortly.
       It will help you identify if your waste is Wet, Dry, Hazardous, Recyclable, or E-Waste.
     </div>
     <div class="chat-coming-features">
-      <div class="chat-feature-chip">📷 Image Recognition</div>
-      <div class="chat-feature-chip">💬 Text Classification</div>
-      <div class="chat-feature-chip">♻️ Disposal Guidance</div>
-      <div class="chat-feature-chip">🌍 Eco Tips</div>
+      <div class="chat-feature-chip" data-i18n="image_recognition">📷 Image Recognition</div>
+      <div class="chat-feature-chip" data-i18n="text_classification">💬 Text Classification</div>
+      <div class="chat-feature-chip" data-i18n="disposal_guidance">♻️ Disposal Guidance</div>
+      <div class="chat-feature-chip" data-i18n="eco_tips">🌍 Eco Tips</div>
     </div>
     <div class="chat-notify-row">
-      <button class="btn btn-primary" style="padding:10px 24px;" onclick="App.showToast('You\'ll be notified when EcoBot launches! 🤖','success')">
+      <button class="btn btn-primary" style="padding:10px 24px;" onclick="App.showToast('You\'ll be notified when EcoBot launches! 🤖','success')" data-i18n="notify_when_ready">
         Notify Me When Ready
       </button>
     </div>
@@ -740,7 +740,7 @@
     </div>
   </div>
   <div class="profile-section">
-    <div style="padding:14px 16px;font-weight:600;font-size:0.9rem;border-bottom:1px solid var(--border);">Preferences</div>
+    <div style="padding:14px 16px;font-weight:600;font-size:0.9rem;border-bottom:1px solid var(--border);" data-i18n="preferences">Preferences</div>
     <div class="profile-row" style="cursor:default;">
       <span class="profile-row-label" data-i18n="pickup_notifications">Pickup Notifications</span>
       <label class="toggle"><input type="checkbox" id="notif-toggle" checked/><span class="toggle-slider"></span></label>
@@ -753,11 +753,11 @@
 
   <!-- Driver Admin Section (Only for Drivers) -->
   <div id="driver-admin-section" class="profile-section" style="display:none; border-top:2px solid var(--orange);">
-    <div style="padding:14px 16px;font-weight:700;font-size:0.9rem;color:var(--orange);">Driver Admin Actions</div>
+    <div style="padding:14px 16px;font-weight:700;font-size:0.9rem;color:var(--orange);" data-i18n="driver_admin_actions">Driver Admin Actions</div>
     <div class="profile-row" onclick="App.resetAllUserPreferences()" style="cursor:pointer;">
       <div style="display:flex;flex-direction:column;gap:2px;">
-        <span class="profile-row-label" style="color:var(--text1);">Reset Global Daily Preferences</span>
-        <span style="font-size:0.65rem;color:var(--text3);">Clears all "Yes/No" choices for the day</span>
+        <span class="profile-row-label" style="color:var(--text1);" data-i18n="reset_global_prefs">Reset Global Daily Preferences</span>
+        <span style="font-size:0.65rem;color:var(--text3);" data-i18n="reset_global_desc">Clears all "Yes/No" choices for the day</span>
       </div>
       <span class="profile-row-value">🔄</span>
     </div>
@@ -765,23 +765,23 @@
 
   <div class="profile-section">
     <div class="profile-row" onclick="App.openLocationPicker()">
-      <span class="profile-row-label">📍 Set Exact Location</span>
+      <span class="profile-row-label" data-i18n="set_exact_location">📍 Set Exact Location</span>
       <span class="profile-row-value">›</span>
     </div>
     <div class="profile-row" onclick="App.navigate('map')">
-      <span class="profile-row-label">🗺 My Routes</span>
+      <span class="profile-row-label" data-i18n="my_routes">🗺 My Routes</span>
       <span class="profile-row-value">›</span>
     </div>
     <div class="profile-row">
-      <span class="profile-row-label">💡 Help &amp; Support</span>
+      <span class="profile-row-label" data-i18n="help_support">💡 Help &amp; Support</span>
       <span class="profile-row-value">›</span>
     </div>
     <div class="profile-row">
-      <span class="profile-row-label">📋 Send Feedback</span>
+      <span class="profile-row-label" data-i18n="send_feedback">📋 Send Feedback</span>
       <span class="profile-row-value">›</span>
     </div>
     <div class="profile-row">
-      <span class="profile-row-label">ℹ️ About EcoRoute</span>
+      <span class="profile-row-label" data-i18n="about_ecoroute">ℹ️ About EcoRoute</span>
       <span class="profile-row-value">v2.1.0</span>
     </div>
     <div class="profile-row" onclick="App.logout()">
@@ -796,9 +796,9 @@
 ══════════════════════════════════════════════════════ -->
 <section id="screen-confirm" class="screen">
   <div style="padding:20px 20px 12px;">
-    <div style="font-size:0.72rem;color:#FF6B00;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Daily Pickup Confirmation</div>
-    <div style="font-size:1rem;font-weight:600;">Is your bin ready for collection?</div>
-    <div style="font-size:0.85rem;color:#A3A3A3;margin-top:4px;" id="confirm-address-line">Scheduled: Today 10:30 AM</div>
+    <div style="font-size:0.72rem;color:#FF6B00;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;" data-i18n="daily_pickup_confirm">Daily Pickup Confirmation</div>
+    <div style="font-size:1rem;font-weight:600;" data-i18n="bin_ready_question">Is your bin ready for collection?</div>
+    <div style="font-size:0.85rem;color:#A3A3A3;margin-top:4px;" id="confirm-address-line" data-i18n="scheduled_today">Scheduled: Today 10:30 AM</div>
   </div>
   <div class="confirm-map-area">
     <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.12;" viewBox="0 0 400 240">
