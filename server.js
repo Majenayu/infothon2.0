@@ -965,7 +965,7 @@ app.post('/api/ai/chat', requireAuth, async (req, res) => {
       let geminiErrorMsg = "None";
     // 1. Try Gemini primary
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const parts = [WASTE_ANALYSIS_SYSTEM_PROMPT + "\n" + userPrompt];
       
       if (image && image.includes('base64,')) {
@@ -986,26 +986,21 @@ app.post('/api/ai/chat', requireAuth, async (req, res) => {
       geminiErrorMsg = geminiError.message || String(geminiError);
       console.warn("Gemini Error, falling back to Groq:", geminiErrorMsg);
       
-      // 2. Try Groq fallback
-      if (groq) {
-        const groqModel = image ? "llama-3.2-90b-vision-preview" : "llama-3.3-70b-versatile";
+      if (image) {
+        // Groq has decommissioned all vision models, so we cannot fallback to Groq for images.
+        throw new Error(`Gemini Vision Error: ${geminiErrorMsg}`);
+      }
 
+      // 2. Try Groq fallback (text only)
+      if (groq && !image) {
         const messages = [
           { role: "system", content: WASTE_ANALYSIS_SYSTEM_PROMPT },
           { role: "user", content: userPrompt }
         ];
 
-        if (image && image.includes('base64,')) {
-           // Groq vision payload...
-           messages[1].content = [
-             { type: "text", text: userPrompt },
-             { type: "image_url", image_url: { url: image } }
-           ];
-        }
-
         const chatCompletion = await groq.chat.completions.create({
           messages,
-          model: groqModel,
+          model: "llama-3.3-70b-versatile",
           response_format: { type: "json_object" }
         });
         responseText = chatCompletion.choices[0].message.content;
