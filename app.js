@@ -1802,6 +1802,8 @@ const App = (() => {
     appendAssistantMessage(text || "Analying image...", 'user');
     input.value = "";
     
+    const imageToSend = assistantImageBase64;
+    
     // Clear preview
     clearChatImage();
 
@@ -1814,7 +1816,7 @@ const App = (() => {
         },
         body: JSON.stringify({
           message: text,
-          image: assistantImageBase64,
+          image: imageToSend,
           language: I18n.currentLang === 'hi' ? 'Hindi' : I18n.currentLang === 'kn' ? 'Kannada' : 'English'
         })
       });
