@@ -512,6 +512,7 @@ const App = (() => {
           <div style="font-size:1rem;font-weight:700;color:var(--text1);">${title}</div>
           <div style="font-size:0.75rem;color:var(--text3);">${sub}</div>
         </div>
+        <button class="btn green" onclick="App.findNearestPoint()" style="margin-bottom: 15px; width: 100%; border-radius: 12px; font-weight: bold; background-color: var(--green); color: white;">Find Nearest Community Hub</button>
         <div style="display:flex;flex-direction:column;gap:12px;max-height:300px;overflow-y:auto;padding-right:4px;">
       `;
 
@@ -2022,6 +2023,7 @@ const OverloadModule = (function() {
       if (!window.ApiModule) return;
       const res = await ApiModule.reportOverload();
       if (res && res.success) {
+        alert("Driver 2 is been asigned for the reamajing areas");
         App.showToast(res.message || `🚨 Area transferred successfully.`, 'success');
         const btn = document.getElementById('overload-btn');
         if (btn) btn.style.display = 'none';

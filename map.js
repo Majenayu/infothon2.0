@@ -702,9 +702,19 @@ const MapModule = (() => {
         userLat = Number(userLoc.lat);
     }
 
-    const points = MOCK_USERS.filter(u => u.role === 'point');
+    let points = [];
+    try {
+      const res = await fetch('/api/users/active');
+      if (res.ok) {
+        const allUsers = await res.json();
+        points = allUsers.filter(u => (u.role || '').toLowerCase() === 'point');
+      }
+    } catch(e) {}
+    
+    if (points.length === 0) {
+      points = MOCK_USERS.filter(u => u.role === 'point');
+    }
     if (points.length === 0) return;
-
     // Use turf to find nearest
     const userPt = turf.point([userLng, userLat]);
     const pointFeatures = points.map(p => turf.point([Number(p.lng), Number(p.lat)], { ...p }));

@@ -163,6 +163,11 @@
     <button id="save-btn" class="btn btn-primary">Save Mock User</button>
     <button id="cancel-btn" class="btn btn-outline" style="display:none;">Cancel Edit</button>
 
+    <div style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+      <div style="font-weight:700; margin-bottom:8px; font-size:1rem; color:var(--orange);">Test Features</div>
+      <button id="test-notif-btn" class="btn btn-outline" style="width:100%; border-color: var(--orange); color: var(--orange);">🔔 Trigger Push Notification</button>
+    </div>
+
     <div class="mock-list">
       <div style="font-weight:600; font-size:0.85rem; margin-bottom:12px; color:var(--text-muted)">CURRENT MOCK USERS</div>
       <div id="list-container">
@@ -395,6 +400,26 @@
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3000);
     }
+
+    document.getElementById('test-notif-btn').onclick = async () => {
+      document.getElementById('test-notif-btn').textContent = '🔔 Triggering...';
+      try {
+        if ('Notification' in window && Notification.permission !== 'denied') {
+          await Notification.requestPermission();
+          if (Notification.permission === 'granted') {
+             new Notification('📢 Morning Pickup Alert', {
+               body: 'This is a test notification for the house user.',
+               icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚛</text></svg>'
+             });
+          }
+        }
+        
+        showToast('Push Notification Triggered! 🔔');
+      } catch(e) { 
+        showToast('Error triggering notification', 'red'); 
+      }
+      setTimeout(() => document.getElementById('test-notif-btn').textContent = '🔔 Trigger Push Notification', 1500);
+    };
 
     window.onload = () => {
       console.log('✅ Window loaded, starting init');
