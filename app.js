@@ -1834,6 +1834,25 @@ const App = (() => {
     assistantImageBase64 = null;
     const preview = document.getElementById('chat-upload-preview');
     if (preview) preview.style.display = 'none';
+    const fileInput = document.getElementById('chat-file-input');
+    if (fileInput) fileInput.value = '';
+  }
+
+  function handleAssistantFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      assistantImageBase64 = e.target.result;
+      const preview = document.getElementById('chat-upload-preview');
+      const previewImg = document.getElementById('chat-preview-img');
+      if (preview && previewImg) {
+        previewImg.src = assistantImageBase64;
+        preview.style.display = 'block';
+      }
+    };
+    reader.readAsDataURL(file);
   }
 
   function openAssistantCamera() {
@@ -1987,7 +2006,8 @@ const App = (() => {
     closeAssistantCamera,
     takeAssistantPhoto,
     toggleAssistantVoice,
-    clearChatImage
+    clearChatImage,
+    handleAssistantFileUpload
   };
 })();
 

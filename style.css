@@ -1534,7 +1534,8 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
 /* ════════════════════════════════════════════════════════
    AI CHAT ASSISTANT
    ════════════════════════════════════════════════════════ */
-#screen-chat { padding-bottom: 0; display: flex; flex-direction: column; overflow: hidden; }
+#screen-chat { padding-bottom: 0; overflow: hidden; }
+#screen-chat.active { display: flex; flex-direction: column; }
 
 .chat-container {
   flex: 1; overflow-y: auto; padding: 10px 20px 80px;
