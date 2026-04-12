@@ -964,16 +964,21 @@ app.post('/api/ai/chat', requireAuth, async (req, res) => {
     // 1. Try Gemini primary
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const contents = [{ role: "user", parts: [{ text: WASTE_ANALYSIS_SYSTEM_PROMPT + "\n" + userPrompt }] }];
+      const parts = [WASTE_ANALYSIS_SYSTEM_PROMPT + "\n" + userPrompt];
       
       if (image && image.includes('base64,')) {
         const base64Data = image.split('base64,')[1];
-        contents[0].parts.push({
-          inlineData: { mimeType: "image/jpeg", data: base64Data }
+        let mimeType = "image/jpeg";
+        const metaStr = image.split(';')[0];
+        if (metaStr.startsWith('data:')) {
+            mimeType = metaStr.replace('data:', '');
+        }
+        parts.push({
+          inlineData: { mimeType: mimeType, data: base64Data }
         });
       }
 
-      const result = await model.generateContent({ contents });
+      const result = await model.generateContent(parts);
       responseText = result.response.text();
     } catch (geminiError) {
       console.warn("Gemini Error, falling back to Groq:", geminiError.message);
