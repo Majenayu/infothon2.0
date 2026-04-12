@@ -21,6 +21,25 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ── AI Integration ──────────────────────────────────────────
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Groq = require("groq-sdk");
+
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+
+const WASTE_ANALYSIS_SYSTEM_PROMPT = `You are the EcoScan AI Waste Assistant. Your goal is to accurately categorize waste and provide disposal instructions.
+Analyze the provided text or image and return a JSON response with:
+{
+  "category": "Recyclable" | "Organic" | "Hazardous" | "Landfill",
+  "item": "Name of the item",
+  "confidence": "Low" | "Medium" | "High",
+  "instructions": "Step-by-step disposal guide",
+  "eco_tip": "A short, encouraging sustainability tip",
+  "language": "Detected language (English, Hindi, or Kannada)"
+}
+Be concise and helpful. If multiple items are present, focus on the most prominent one.`;
+
 // ── Middleware ───────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
@@ -929,6 +948,78 @@ app.get('/api/config', (req, res) => {
   res.json({
     MAPBOX_TOKEN: process.env.MAPBOX_TOKEN || ''
   });
+});
+
+// ════════════════════════════════════════════════════════════
+//  AI ASSISTANT ROUTES
+// ════════════════════════════════════════════════════════════
+
+app.post('/api/ai/chat', requireAuth, async (req, res) => {
+  try {
+    const { message, image, language } = req.body;
+    let responseText = "";
+
+    const userPrompt = `Language: ${language || 'English'}\nUser Query: ${message || 'What is this?'}`;
+
+    // 1. Try Gemini primary
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const contents = [{ role: "user", parts: [{ text: WASTE_ANALYSIS_SYSTEM_PROMPT + "\n" + userPrompt }] }];
+      
+      if (image && image.includes('base64,')) {
+        const base64Data = image.split('base64,')[1];
+        contents[0].parts.push({
+          inlineData: { mimeType: "image/jpeg", data: base64Data }
+        });
+      }
+
+      const result = await model.generateContent({ contents });
+      responseText = result.response.text();
+    } catch (geminiError) {
+      console.warn("Gemini Error, falling back to Groq:", geminiError.message);
+      
+      // 2. Try Groq fallback
+      if (groq) {
+        const groqModel = image ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile";
+        const messages = [
+          { role: "system", content: WASTE_ANALYSIS_SYSTEM_PROMPT },
+          { role: "user", content: userPrompt }
+        ];
+
+        if (image && image.includes('base64,')) {
+           // Groq vision payload...
+           messages[1].content = [
+             { type: "text", text: userPrompt },
+             { type: "image_url", image_url: { url: image } }
+           ];
+        }
+
+        const chatCompletion = await groq.chat.completions.create({
+          messages,
+          model: groqModel,
+          response_format: { type: "json_object" }
+        });
+        responseText = chatCompletion.choices[0].message.content;
+      } else {
+        throw new Error("Gemini failed and Groq not configured.");
+      }
+    }
+
+    // Clean up response if it has markdown blocks
+    const cleanedJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+    const resultJson = JSON.parse(cleanedJson);
+
+    // Optional: Award points
+    if (resultJson.category && req.user) {
+       await User.findByIdAndUpdate(req.user.id, { $inc: { points: 10 } });
+    }
+
+    res.json(resultJson);
+
+  } catch (err) {
+    console.error("AI Chat Error:", err);
+    res.status(500).json({ error: "Could not process waste analysis. " + err.message });
+  }
 });
 
 // ── Health check ─────────────────────────────────────────────

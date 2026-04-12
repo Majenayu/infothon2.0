@@ -690,30 +690,42 @@
      SCREEN: CHATBOT (Placeholder)
 ══════════════════════════════════════════════════════ -->
 <section id="screen-chat" class="screen" style="padding-bottom:0;">
-  <div style="padding:20px 20px 12px;">
-    <div class="font-display" style="font-size:1.2rem;font-weight:700;" data-i18n="waste_assistant">Waste Assistant</div>
-    <div style="font-size:0.8rem;color:#A3A3A3;margin-top:2px;" data-i18n="ai_waste_classification">AI-powered waste classification</div>
+  <div style="padding:15px 20px 8px; border-bottom:1px solid var(--border);">
+    <div class="font-display" style="font-size:1.1rem;font-weight:700;" data-i18n="waste_assistant">Waste Assistant</div>
+    <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">Gemini &amp; Groq Hybrid Engine</div>
   </div>
-  <div class="chat-placeholder">
-    <div class="chat-placeholder-icon">🤖</div>
-    <div class="chat-placeholder-title" data-i18n="ai_coming_soon">AI Model Coming Soon</div>
-    <div class="chat-placeholder-desc" data-i18n="ai_coming_desc">
-      Our intelligent waste classification assistant is being trained and will be available shortly.
-      It will help you identify if your waste is Wet, Dry, Hazardous, Recyclable, or E-Waste.
+
+  <div class="chat-container" id="chat-messages">
+    <div class="chat-msg bot">
+      Hello! I'm your EcoScan Assistant. 👋<br><br>
+      You can type a query, use voice, or take a photo of waste to identify how to dispose of it!
     </div>
-    <div class="chat-coming-features">
-      <div class="chat-feature-chip" data-i18n="image_recognition">📷 Image Recognition</div>
-      <div class="chat-feature-chip" data-i18n="text_classification">💬 Text Classification</div>
-      <div class="chat-feature-chip" data-i18n="disposal_guidance">♻️ Disposal Guidance</div>
-      <div class="chat-feature-chip" data-i18n="eco_tips">🌍 Eco Tips</div>
+  </div>
+
+  <div class="chat-input-bar">
+    <div id="chat-upload-preview" class="chat-image-preview" style="display:none;">
+       <img id="chat-preview-img" src="" alt="preview">
+       <div class="chat-image-remove" onclick="App.clearChatImage()">✕</div>
     </div>
-    <div class="chat-notify-row">
-      <button class="btn btn-primary" style="padding:10px 24px;" onclick="App.showToast('You\'ll be notified when EcoBot launches! 🤖','success')" data-i18n="notify_when_ready">
-        Notify Me When Ready
+    
+    <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
+    
+    <div class="chat-input-btns">
+      <button class="chat-action-btn btn-camera" onclick="App.openAssistantCamera()" title="Camera">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+        </svg>
       </button>
-    </div>
-    <div class="chat-api-hint">
-      Developer: set <code>CHATBOT.ENABLED = true</code> in <code>config.js</code> to activate
+      <button id="chat-voice-btn" class="chat-action-btn btn-voice" onclick="App.toggleAssistantVoice()" title="Voice">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <button class="chat-action-btn btn-send" onclick="App.sendAssistantMessage()" title="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
     </div>
   </div>
 </section>
@@ -897,6 +909,20 @@
 </script>
 
 
+
+<!-- Assistant Camera Modal -->
+<div id="asst-camera-modal" class="camera-modal">
+  <div class="camera-view">
+    <video id="asst-camera-video" autoplay playsinline></video>
+  </div>
+  <div class="camera-controls">
+    <span class="camera-cancel" onclick="App.closeAssistantCamera()">Cancel</span>
+    <div class="camera-shutter" onclick="App.takeAssistantPhoto()">
+      <div class="camera-shutter-inner"></div>
+    </div>
+    <span style="width:40px;"></span>
+  </div>
+</div>
 
 </body>
 </html>

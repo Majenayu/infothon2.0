@@ -13,6 +13,11 @@ const App = (() => {
   let selectedSignupRole = 'home';
   let historyCache = { logs: null, summaries: null };
 
+  // AI Assistant state
+  let assistantImageBase64 = null;
+  let isAssistantRecording = false;
+  let assistantRecognition = null;
+
   // Catch the install prompt early before DOMContentLoaded
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
@@ -1750,6 +1755,186 @@ const App = (() => {
     } catch (e) { console.warn('Polling check failed'); }
   }
 
+  // ════════════════════════════════════════════════════════════
+  //  AI ASSISTANT (ECOSCAN INTEGRATION)
+  // ════════════════════════════════════════════════════════════
+
+  function appendAssistantMessage(text, role, data = null) {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    const msg = document.createElement('div');
+    msg.className = `chat-msg ${role}`;
+    msg.innerHTML = text;
+
+    if (data) {
+      const resultHtml = `
+        <div class="waste-result">
+          <div class="waste-cat-badge cat-${data.category.toLowerCase()}">${data.category}</div>
+          <span class="waste-item">${data.item}</span>
+          <div class="waste-instr">${data.instructions}</div>
+          ${data.eco_tip ? `<div class="waste-tip">💡 ${data.eco_tip}</div>` : ''}
+        </div>
+      `;
+      msg.innerHTML += resultHtml;
+      
+      // Points animation if added
+      showToast(`+10 Eco Points! 🏆`, 'success');
+      user.points = (user.points || 0) + 10;
+      renderHome();
+    }
+
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
+    
+    if (role === 'bot' && text && !data) {
+       speakAssistantResponse(text.replace(/<[^>]*>/g, ''));
+    } else if (role === 'bot' && data) {
+       speakAssistantResponse(`${data.item} is ${data.category}. ${data.instructions}`);
+    }
+  }
+
+  async function sendAssistantMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text && !assistantImageBase64) return;
+
+    appendAssistantMessage(text || "Analying image...", 'user');
+    input.value = "";
+    
+    // Clear preview
+    clearChatImage();
+
+    try {
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ApiModule.getToken()}`
+        },
+        body: JSON.stringify({
+          message: text,
+          image: assistantImageBase64,
+          language: I18n.currentLang === 'hi' ? 'Hindi' : I18n.currentLang === 'kn' ? 'Kannada' : 'English'
+        })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      appendAssistantMessage("", 'bot', data);
+    } catch (err) {
+      appendAssistantMessage(`Sorry, I couldn't process that: ${err.message}`, 'bot');
+    } finally {
+      assistantImageBase64 = null;
+    }
+  }
+
+  function clearChatImage() {
+    assistantImageBase64 = null;
+    const preview = document.getElementById('chat-upload-preview');
+    if (preview) preview.style.display = 'none';
+  }
+
+  function openAssistantCamera() {
+    const modal = document.getElementById('asst-camera-modal');
+    const video = document.getElementById('asst-camera-video');
+    modal.style.display = 'flex';
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => {
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch(err => {
+        showToast("Camera access denied", "error");
+        closeAssistantCamera();
+      });
+  }
+
+  function closeAssistantCamera() {
+    const modal = document.getElementById('asst-camera-modal');
+    const video = document.getElementById('asst-camera-video');
+    modal.style.display = 'none';
+    if (video.srcObject) {
+      video.srcObject.getTracks().forEach(track => track.stop());
+    }
+  }
+
+  function takeAssistantPhoto() {
+    const video = document.getElementById('asst-camera-video');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    assistantImageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+    
+    const preview = document.getElementById('chat-upload-preview');
+    const previewImg = document.getElementById('chat-preview-img');
+    if (preview && previewImg) {
+      previewImg.src = assistantImageBase64;
+      preview.style.display = 'block';
+    }
+    
+    closeAssistantCamera();
+  }
+
+  function toggleAssistantVoice() {
+    if (isAssistantRecording) {
+      stopAssistantVoice();
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showToast("Voice recognition not supported in this browser", "error");
+      return;
+    }
+
+    assistantRecognition = new SpeechRecognition();
+    assistantRecognition.lang = I18n.currentLang === 'hi' ? 'hi-IN' : I18n.currentLang === 'kn' ? 'kn-IN' : 'en-US';
+    assistantRecognition.interimResults = false;
+
+    assistantRecognition.onstart = () => {
+      isAssistantRecording = true;
+      document.getElementById('chat-voice-btn').classList.add('recording');
+    };
+
+    assistantRecognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      document.getElementById('chat-input').value = text;
+      sendAssistantMessage();
+    };
+
+    assistantRecognition.onerror = () => stopAssistantVoice();
+    assistantRecognition.onend = () => stopAssistantVoice();
+
+    assistantRecognition.start();
+  }
+
+  function stopAssistantVoice() {
+    isAssistantRecording = false;
+    document.getElementById('chat-voice-btn').classList.remove('recording');
+    if (assistantRecognition) assistantRecognition.stop();
+  }
+
+  function speakAssistantResponse(text) {
+    if (!window.speechSynthesis) return;
+    
+    // Check if voice is enabled in profile settings
+    const voiceEnabled = document.getElementById('voice-toggle')?.checked;
+    if (voiceEnabled === false) return;
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    const langMap = { 'en': 'en-US', 'hi': 'hi-IN', 'kn': 'kn-IN' };
+    utterance.lang = langMap[I18n.currentLang] || 'en-US';
+    
+    window.speechSynthesis.speak(utterance);
+  }
+
   return {
     init, navigate, showToast,
     renderGauge, updateFill,
@@ -1794,7 +1979,15 @@ const App = (() => {
     // Expose for MapModule to call (Feature 3)
     getUserLocation: () => liveCoords || user?.location,
     getCurrentUser:  () => user,
-    getCurrentRole:  () => currentRole
+    getCurrentRole:  () => currentRole,
+
+    // Assistant methods
+    sendAssistantMessage,
+    openAssistantCamera,
+    closeAssistantCamera,
+    takeAssistantPhoto,
+    toggleAssistantVoice,
+    clearChatImage
   };
 })();
 
