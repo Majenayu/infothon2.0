@@ -962,6 +962,7 @@ app.post('/api/ai/chat', requireAuth, async (req, res) => {
 
     const userPrompt = `Language: ${language || 'English'}\nUser Query: ${message || 'What is this?'}`;
 
+      let geminiErrorMsg = "None";
     // 1. Try Gemini primary
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -982,11 +983,13 @@ app.post('/api/ai/chat', requireAuth, async (req, res) => {
       const result = await model.generateContent(parts);
       responseText = result.response.text();
     } catch (geminiError) {
-      console.warn("Gemini Error, falling back to Groq:", geminiError.message);
+      geminiErrorMsg = geminiError.message || String(geminiError);
+      console.warn("Gemini Error, falling back to Groq:", geminiErrorMsg);
       
       // 2. Try Groq fallback
       if (groq) {
         const groqModel = image ? "llama-3.2-90b-vision-preview" : "llama-3.3-70b-versatile";
+
         const messages = [
           { role: "system", content: WASTE_ANALYSIS_SYSTEM_PROMPT },
           { role: "user", content: userPrompt }
@@ -1006,14 +1009,19 @@ app.post('/api/ai/chat', requireAuth, async (req, res) => {
           response_format: { type: "json_object" }
         });
         responseText = chatCompletion.choices[0].message.content;
-      } else {
-        throw new Error("Gemini failed and Groq not configured.");
+    } else {
+        throw new Error(`Gemini failed (${geminiErrorMsg}) and Groq not configured.`);
       }
     }
 
     // Clean up response if it has markdown blocks
     const cleanedJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
-    const resultJson = JSON.parse(cleanedJson);
+    let resultJson;
+    try {
+        resultJson = JSON.parse(cleanedJson);
+    } catch (parseError) {
+        throw new Error(`Invalid JSON returned. Gemini Error: ${geminiErrorMsg}. Output: ${responseText}`);
+    }
 
     // Optional: Award points
     if (resultJson.category && req.user) {
