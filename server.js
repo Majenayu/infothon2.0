@@ -986,7 +986,7 @@ app.post('/api/ai/chat', requireAuth, async (req, res) => {
       
       // 2. Try Groq fallback
       if (groq) {
-        const groqModel = image ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile";
+        const groqModel = image ? "llama-3.2-90b-vision-preview" : "llama-3.3-70b-versatile";
         const messages = [
           { role: "system", content: WASTE_ANALYSIS_SYSTEM_PROMPT },
           { role: "user", content: userPrompt }
